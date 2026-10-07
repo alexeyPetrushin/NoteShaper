@@ -1,0 +1,29 @@
+sr=44100 input=208 target=220 output=220.004 cents=0.0344955
+sr=44100 input=234 target=220 output=220.001 cents=0.00905037
+sr=44100 input=415 target=440 output=440.045 cents=0.178868
+sr=44100 input=466 target=440 output=440.055 cents=0.21612
+sr=44100 input=110.7 target=110 output=110 cents=0.00603425
+sr=44100 input=83 target=110 output=110 cents=0.0048004
+sr=48000 input=208 target=220 output=220.004 cents=0.0343521
+sr=48000 input=234 target=220 output=220.004 cents=0.0310891
+sr=48000 input=415 target=440 output=440.023 cents=0.0910892
+sr=48000 input=466 target=440 output=440.029 cents=0.11563
+sr=48000 input=110.7 target=110 output=110 cents=0.00570901
+sr=48000 input=83 target=110 output=110 cents=0.00605151
+sr=96000 input=208 target=220 output=220 cents=0.00268569
+sr=96000 input=234 target=220 output=220.001 cents=0.00541038
+sr=96000 input=415 target=440 output=440.006 cents=0.0246324
+sr=96000 input=466 target=440 output=440.007 cents=0.028531
+sr=96000 input=110.7 target=110 output=110 cents=0.00148687
+sr=96000 input=83 target=110 output=110 cents=0.00144751
+sr=192000 input=208 target=220 output=220 cents=0.00165389
+sr=192000 input=234 target=220 output=220 cents=0.00072013
+sr=192000 input=415 target=440 output=440.001 cents=0.00452464
+sr=192000 input=466 target=440 output=440.001 cents=0.00493569
+sr=192000 input=110.7 target=110 output=110 cents=0.000300854
+sr=192000 input=83 target=110 output=110 cents=0.000152606
+Transition: hard=220.003 smooth=239.284 Hz
+Vibrato: hard centre=-0.0108544 depth=0.239785; natural centre=-0.780124 depth=26.311 cents
+Boundary target changes: hard=25 natural=0
+Natural transition: target=59 output=246.943 Hz
+PASS: pitch accuracy, four sample rates, dry, empty targets, chords/scales, noise, silence, block sizes, retune attack/re-attack, freedom, vibrato, stable boundaries, melody changes, stereo polarity (3.61975 s)

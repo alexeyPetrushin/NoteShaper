@@ -1,0 +1,17 @@
+/build/
+/build-*/
+/.vs/
+/.idea/
+/ThirdParty/JUCE-*/
+/ThirdParty/*.zip
+/VST3/
+/Standalone/
+*.exe
+*.dll
+*.obj
+*.o
+*.a
+*.f32
+*.zip
+__pycache__/
+.DS_Store
