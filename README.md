@@ -2,6 +2,8 @@
 
 [Русский](README.ru.md) · [English guide](docs/USER_GUIDE.en.md) · [Русская инструкция](docs/USER_GUIDE.ru.md)
 
+[Support the author](https://www.donationalerts.com/r/lesha_diabet_)
+
 An open-source monophonic vocal pitch-correction effect for **Windows x64 / VST3**, with a standalone application. Choose a note, chord, scale or custom set, then dial in hard tuning or gentle correction with three always-visible rotary controls.
 
 ![NoteShaper interface](assets/preview.png)
