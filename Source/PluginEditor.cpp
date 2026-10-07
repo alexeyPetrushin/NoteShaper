@@ -50,7 +50,8 @@ void NoteShaperSkin::drawButtonBackground(juce::Graphics& g, juce::Button& b,
     const auto id = b.getComponentID();
     const bool toggle = id == "natural";
     if (id == "language") {
-        if (hover || down) { g.setColour(rail); g.fillRoundedRectangle(bounds, corner); }
+        g.setColour(hover || down ? rail : panel); g.fillRoundedRectangle(bounds, corner);
+        g.setColour(controlLine.withAlpha(0.6f)); g.drawRoundedRectangle(bounds, corner, 0.8f);
     } else if (toggle) {
         if (hover || down) { g.setColour(rail); g.fillRoundedRectangle(bounds, corner); }
         const float y = b.getHeight() * 0.5f;
@@ -76,13 +77,8 @@ void NoteShaperSkin::drawButtonBackground(juce::Graphics& g, juce::Button& b,
 void NoteShaperSkin::drawButtonText(juce::Graphics& g, juce::TextButton& b, bool, bool) {
     const auto id = b.getComponentID();
     if (id == "language") {
-        const bool ru = b.getToggleState();
-        g.setFont(uiFont(captionSize, ru ? juce::Font::plain : juce::Font::bold));
-        g.setColour(ru ? muted : text); g.drawText("EN", juce::Rectangle<int>(4, 0, 28, b.getHeight()), juce::Justification::centred);
-        g.setFont(uiFont(captionSize)); g.setColour(muted);
-        g.drawText("/", juce::Rectangle<int>(32, 0, 12, b.getHeight()), juce::Justification::centred);
-        g.setFont(uiFont(captionSize, ru ? juce::Font::bold : juce::Font::plain));
-        g.setColour(ru ? text : muted); g.drawText("RU", juce::Rectangle<int>(44, 0, 28, b.getHeight()), juce::Justification::centred);
+        g.setFont(uiFont(bodySize)); g.setColour(text);
+        g.drawText(b.getButtonText(), b.getLocalBounds(), juce::Justification::centred);
         return;
     }
     const bool toggle = id == "natural";
@@ -231,7 +227,7 @@ NoteShaperEditor::NoteShaperEditor(NoteShaperProcessor& p) : AudioProcessorEdito
     natural.setTooltip(tr(u8"Подтягивать центр ноты, сохраняя больше вибрато. Короткие колебания около границы нот не меняют цель. «Мягко» включает этот режим, «Рэп» выключает."));
     naturalAttachment = std::make_unique<ButtonAttachment>(p.parameters, "natural", natural);
     natural.onClick = [this] { refresh(); };
-    language.setButtonText("EN / RU"); language.setClickingTogglesState(true); addAndMakeVisible(language);
+    language.setClickingTogglesState(true); addAndMakeVisible(language);
     identify(language, "language", "Interface language", 27);
     language.onClick = [this] {
         russian = language.getToggleState();
@@ -259,9 +255,10 @@ juce::String NoteShaperEditor::translated(const char* en, const char* ru) const 
 void NoteShaperEditor::updateLanguage() {
     const auto t = [this](const char* en, const char* ru) { return translated(en, ru); };
     setTitle(t("NoteShaper — vocal pitch correction", u8"NoteShaper — подтяжка вокала"));
+    language.setButtonText(russian ? "RU" : "EN");
     language.setToggleState(russian, juce::dontSendNotification);
     language.setTitle(t("Interface language: English", u8"Язык интерфейса: русский"));
-    language.setTooltip(russian ? "Switch to English" : tr(u8"Переключить на русский"));
+    language.setTooltip(t("Switch to Russian", u8"Переключить на английский"));
     const auto populate = [](juce::ComboBox& box, const juce::StringArray& items, int first) {
         const int selected = box.getSelectedId(); box.clear(juce::dontSendNotification);
         for (int i = 0; i < items.size(); ++i) box.addItem(items[i], first + i);
@@ -406,6 +403,6 @@ void NoteShaperEditor::resized() {
     summary.setBounds(32, 176, 656, 24);
     natural.setBounds(32, 488, 280, 44);
     for (int i = 0; i < 3; ++i) presets[i].setBounds(384 + i * 104, 240, 96, 44);
-    language.setBounds(612, 16, 76, 44);
+    language.setBounds(632, 16, 56, 44);
     strength.setBounds(48, 320, 176, 144); speed.setBounds(272, 320, 176, 144); freedom.setBounds(496, 320, 176, 144);
 }

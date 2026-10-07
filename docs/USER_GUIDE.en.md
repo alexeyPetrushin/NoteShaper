@@ -20,7 +20,7 @@ If the entire NoteFollow package was previously copied into the system folder, t
 
 ## Interface labels
 
-New instances open in English. Click **EN / RU** in the top-right corner to toggle English and Russian. The active language is bold; the choice is retained when reopening the editor and saved with the project. The main labels are:
+New instances open in English. Click **EN** in the top-right corner to switch to Russian. The button changes to **RU**; click it again to return to English; the choice is retained when reopening the editor and saved with the project. The main labels are:
 
 | Label | Meaning |
 |---|---|

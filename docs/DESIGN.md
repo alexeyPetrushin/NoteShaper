@@ -12,13 +12,13 @@ The primary task is to choose the pitches a voice should follow, then adjust cor
 
 ## Language / Язык
 
-New instances open in English. One EN / RU button replaces the old subtitle at the top right. The active language is bold. One click translates labels, menus, units, tooltips and accessible control titles. The choice is retained on reopening and in the saved project through UI metadata; no host/audio parameter is added. Legacy states without this metadata open in English.
+New instances open in English. One button replaces the old subtitle at the top right. It shows EN in English and RU in Russian, with the same font, border and height as the other controls. One click translates labels, menus, units, tooltips and accessible control titles. The choice is retained on reopening and in the saved project through UI metadata; no host/audio parameter is added. Legacy states without this metadata open in English.
 
-Английский по умолчанию, одно нажатие EN / RU переключает язык всего интерфейса. Выбор сохраняется в проекте; звуковые настройки и идентификаторы параметров не меняются.
+Английский по умолчанию, кнопка EN включает русский и меняется на RU; повторное нажатие возвращает английский. Выбор сохраняется в проекте; звуковые настройки и идентификаторы параметров не меняются.
 
 ## Consistency / Единообразие
 
-One typeface, Segoe UI. Three sizes: 14 px supporting information, 18 px controls/section labels, 20 px product name/values. Bold is reserved for section labels and the active language. Main controls are 44 px high. Outer margin 32 px, field gaps 16 px, preset gaps 8 px. White, cool grey and graphite; one border/radius treatment for dropdowns and buttons. Editable values have no permanent background; hover/focus reveals the field.
+One typeface, Segoe UI. Three sizes: 14 px supporting information, 18 px controls/section labels, 20 px product name/values. Bold is reserved for section labels. Main controls are 44 px high. Outer margin 32 px, field gaps 16 px, preset gaps 8 px. White, cool grey and graphite; one border/radius treatment for dropdowns and buttons. Editable values have no permanent background; hover/focus reveals the field.
 
 The chord view exposes 11 controls including language, versus 14 before. No control is nested in another button-like container. A source change takes open + select; presets and custom notes each take one click.
 

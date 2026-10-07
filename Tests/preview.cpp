@@ -95,10 +95,12 @@ int main(int argc, char** argv) {
         for (const auto& id : {"amount", "speed", "tolerance"})
             expect(control<juce::Slider>(*e, id).getSliderStyle() == juce::Slider::RotaryHorizontalVerticalDrag, "rotary control missing");
         expect(!control<juce::Button>(*e, "language").getToggleState(), "new instance does not default to English");
+        expect(control<juce::Button>(*e, "language").getButtonText() == "EN", "language must be one EN button");
         expect(control<juce::ComboBox>(*e, "mode").getItemText(1) == "Chord", "English source labels missing");
         expect(control<juce::Button>(*e, "preset2").getButtonText() == "Rap", "English presets missing");
         const auto languageMask = notefollow::noteMask(p.settings());
         click(*e, "language");
+        expect(control<juce::Button>(*e, "language").getButtonText() == "RU", "language button must switch to RU");
         expect(control<juce::ComboBox>(*e, "mode").getItemText(1) == juce::String::fromUTF8(u8"Аккорд"), "Russian source labels missing");
         expect(control<juce::Button>(*e, "preset2").getButtonText() == juce::String::fromUTF8(u8"Рэп"), "Russian presets missing");
         expect(control<juce::Slider>(*e, "speed").getTextValueSuffix().contains(juce::String::fromUTF8(u8"мс")), "Russian units missing");
