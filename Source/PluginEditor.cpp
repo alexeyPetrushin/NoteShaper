@@ -50,8 +50,7 @@ void NoteShaperSkin::drawButtonBackground(juce::Graphics& g, juce::Button& b,
     const auto id = b.getComponentID();
     const bool toggle = id == "natural";
     if (id == "language") {
-        g.setColour(hover || down ? rail : panel); g.fillRoundedRectangle(bounds, corner);
-        g.setColour(controlLine.withAlpha(0.6f)); g.drawRoundedRectangle(bounds, corner, 0.8f);
+        if (hover || down) { g.setColour(rail); g.fillRoundedRectangle(bounds, corner); }
     } else if (toggle) {
         if (hover || down) { g.setColour(rail); g.fillRoundedRectangle(bounds, corner); }
         const float y = b.getHeight() * 0.5f;
@@ -74,10 +73,11 @@ void NoteShaperSkin::drawButtonBackground(juce::Graphics& g, juce::Button& b,
         g.setColour(accent); g.drawRoundedRectangle(bounds.reduced(1), corner, 2);
     }
 }
-void NoteShaperSkin::drawButtonText(juce::Graphics& g, juce::TextButton& b, bool, bool) {
+void NoteShaperSkin::drawButtonText(juce::Graphics& g, juce::TextButton& b, bool hover, bool down) {
     const auto id = b.getComponentID();
     if (id == "language") {
-        g.setFont(uiFont(bodySize)); g.setColour(text);
+        g.setFont(uiFont(captionSize));
+        g.setColour(hover || down || b.hasKeyboardFocus(true) ? text : muted);
         g.drawText(b.getButtonText(), b.getLocalBounds(), juce::Justification::centred);
         return;
     }

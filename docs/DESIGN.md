@@ -12,7 +12,7 @@ The primary task is to choose the pitches a voice should follow, then adjust cor
 
 ## Language / Язык
 
-New instances open in English. One button replaces the old subtitle at the top right. It shows EN in English and RU in Russian, with the same font, border and height as the other controls. One click translates labels, menus, units, tooltips and accessible control titles. The choice is retained on reopening and in the saved project through UI metadata; no host/audio parameter is added. Legacy states without this metadata open in English.
+New instances open in English. One quiet text button replaces the old subtitle at the top right. It shows EN in English and RU in Russian: 14 px muted text, no resting border or fill. Its 56 × 44 px click area is retained; hover gives subtle feedback and keyboard focus remains visible. One click translates labels, menus, units, tooltips and accessible control titles. The choice is retained on reopening and in the saved project through UI metadata; no host/audio parameter is added. Legacy states without this metadata open in English.
 
 Английский по умолчанию, кнопка EN включает русский и меняется на RU; повторное нажатие возвращает английский. Выбор сохраняется в проекте; звуковые настройки и идентификаторы параметров не меняются.
 
