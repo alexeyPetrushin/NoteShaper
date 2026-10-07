@@ -27,7 +27,7 @@ Extract the archive, close your DAW, and copy the entire `VST3/NoteShaper.vst3` 
 - Mono or stereo processing; shared pitch marks preserve the channel relationship.
 - Light, mostly monochrome interface with geometric controls.
 
-The interface labels are currently Russian. The [English guide](docs/USER_GUIDE.en.md) includes their translations.
+The interface opens in English. Click **EN / RU** in the top-right corner to switch languages; the choice is saved with the project.
 
 ## Scope and limitations
 

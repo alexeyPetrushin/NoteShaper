@@ -8,8 +8,6 @@ constexpr float captionSize = 14, bodySize = 18, valueSize = 20;
 constexpr float corner = 6;
 juce::Font uiFont(float size, int style = juce::Font::plain) { return juce::Font("Segoe UI", size, style); }
 const juce::StringArray names{"C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"};
-const juce::StringArray chords{juce::String::fromUTF8(u8"Мажор"), juce::String::fromUTF8(u8"Минор"), juce::String::fromUTF8(u8"Доминантсептаккорд"), juce::String::fromUTF8(u8"Мажорный септаккорд"),
-                             juce::String::fromUTF8(u8"Минорный септаккорд"), "Sus2", "Sus4", juce::String::fromUTF8(u8"Квинта")};
 void label(juce::Graphics& g, const juce::String& value, juce::Rectangle<int> bounds,
            float size = 14, juce::Colour colour = muted, int alignment = juce::Justification::left) {
     g.setColour(colour); g.setFont(uiFont(size)); g.drawText(value, bounds, alignment);
@@ -51,7 +49,9 @@ void NoteShaperSkin::drawButtonBackground(juce::Graphics& g, juce::Button& b,
     auto bounds = b.getLocalBounds().toFloat().reduced(0.7f);
     const auto id = b.getComponentID();
     const bool toggle = id == "natural";
-    if (toggle) {
+    if (id == "language") {
+        if (hover || down) { g.setColour(rail); g.fillRoundedRectangle(bounds, corner); }
+    } else if (toggle) {
         if (hover || down) { g.setColour(rail); g.fillRoundedRectangle(bounds, corner); }
         const float y = b.getHeight() * 0.5f;
         const juce::Rectangle<float> check(1, y - 10, 20, 20);
@@ -75,6 +75,16 @@ void NoteShaperSkin::drawButtonBackground(juce::Graphics& g, juce::Button& b,
 }
 void NoteShaperSkin::drawButtonText(juce::Graphics& g, juce::TextButton& b, bool, bool) {
     const auto id = b.getComponentID();
+    if (id == "language") {
+        const bool ru = b.getToggleState();
+        g.setFont(uiFont(captionSize, ru ? juce::Font::plain : juce::Font::bold));
+        g.setColour(ru ? muted : text); g.drawText("EN", juce::Rectangle<int>(4, 0, 28, b.getHeight()), juce::Justification::centred);
+        g.setFont(uiFont(captionSize)); g.setColour(muted);
+        g.drawText("/", juce::Rectangle<int>(32, 0, 12, b.getHeight()), juce::Justification::centred);
+        g.setFont(uiFont(captionSize, ru ? juce::Font::bold : juce::Font::plain));
+        g.setColour(ru ? text : muted); g.drawText("RU", juce::Rectangle<int>(44, 0, 28, b.getHeight()), juce::Justification::centred);
+        return;
+    }
     const bool toggle = id == "natural";
     const bool selected = b.getToggleState();
     g.setFont(uiFont(bodySize));
@@ -152,6 +162,7 @@ void NoteShaperSkin::drawComboBoxTextWhenNothingSelected(juce::Graphics& g, juce
 
 NoteShaperEditor::NoteShaperEditor(NoteShaperProcessor& p) : AudioProcessorEditor(p), processor(p) {
     setLookAndFeel(&skin);
+    russian = p.parameters.state.getProperty("editorLanguage", "en").toString() == "ru";
     setTitle(juce::String::fromUTF8(u8"NoteShaper — подтяжка вокала"));
     const juce::StringArray modeNames{tr(u8"Нота"), tr(u8"Аккорд"), tr(u8"Гамма"), tr(u8"Свой набор"), "MIDI"};
     for (int i = 0; i < modeNames.size(); ++i) mode.addItem(modeNames[i], i + 1);
@@ -162,7 +173,6 @@ NoteShaperEditor::NoteShaperEditor(NoteShaperProcessor& p) : AudioProcessorEdito
     addAndMakeVisible(root); identify(root, "root", tr(u8"Основная нота"), 2);
     root.setTooltip(tr(u8"Выберите основную ноту. Октава подбирается рядом с голосом."));
     root.onChange = [this] { if (root.getSelectedId() > 0) chooseNote(root.getSelectedId() - 1); };
-    for (int i = 0; i < chords.size(); ++i) chord.addItem(chords[i], i + 2);
     addAndMakeVisible(chord); identify(chord, "chord", juce::String::fromUTF8(u8"Тип аккорда"), 3);
     chord.setTooltip(juce::String::fromUTF8(u8"Аккорд задаёт допустимые ноты для одного голоса."));
     chord.onChange = [this] {
@@ -186,14 +196,10 @@ NoteShaperEditor::NoteShaperEditor(NoteShaperProcessor& p) : AudioProcessorEdito
         identify(keys[i], "note" + juce::String(i), names[i], i + 7);
         keys[i].onClick = [this, i] { chooseNote(i); };
     }
-    const juce::StringArray presetNames{juce::String::fromUTF8(u8"Мягко"), juce::String::fromUTF8(u8"Плотно"), juce::String::fromUTF8(u8"Рэп")};
-    for (int i = 0; i < presetNames.size(); ++i) preset.addItem(presetNames[i], i + 1);
-    addAndMakeVisible(preset); identify(preset, "preset", tr(u8"Готовая настройка коррекции"), 20);
-    preset.setTextWhenNothingSelected(tr(u8"Вручную"));
-    preset.setTooltip(tr(u8"Готовая настройка трёх ручек и вибрато. Выбранные ноты сохраняются. После ручной правки — «Вручную»."));
-    preset.onChange = [this] {
-        if (preset.getSelectedId() > 0) { processor.applyPreset(preset.getSelectedId() - 1); refresh(); }
-    };
+    for (int i = 0; i < 3; ++i) {
+        addAndMakeVisible(presets[i]); identify(presets[i], "preset" + juce::String(i), "", i + 20);
+        presets[i].onClick = [this, i] { processor.applyPreset(i); refresh(); };
+    }
     for (auto* slider : {&strength, &speed, &freedom}) {
         slider->setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
         slider->setTextBoxStyle(juce::Slider::TextBoxBelow, false, 116, 32);
@@ -225,6 +231,13 @@ NoteShaperEditor::NoteShaperEditor(NoteShaperProcessor& p) : AudioProcessorEdito
     natural.setTooltip(tr(u8"Подтягивать центр ноты, сохраняя больше вибрато. Короткие колебания около границы нот не меняют цель. «Мягко» включает этот режим, «Рэп» выключает."));
     naturalAttachment = std::make_unique<ButtonAttachment>(p.parameters, "natural", natural);
     natural.onClick = [this] { refresh(); };
+    language.setButtonText("EN / RU"); language.setClickingTogglesState(true); addAndMakeVisible(language);
+    identify(language, "language", "Interface language", 27);
+    language.onClick = [this] {
+        russian = language.getToggleState();
+        processor.parameters.state.setProperty("editorLanguage", russian ? "ru" : "en", nullptr);
+        updateLanguage(); refresh();
+    };
     for (auto* l : {&status, &summary, &noteCaption}) {
         addAndMakeVisible(*l); l->setColour(juce::Label::textColourId, muted);
         l->setBorderSize(juce::BorderSize<int>(0)); l->setFont(uiFont(captionSize));
@@ -235,9 +248,56 @@ NoteShaperEditor::NoteShaperEditor(NoteShaperProcessor& p) : AudioProcessorEdito
     if (initialChord >= 1 && initialChord <= 8) rememberedChord = initialChord;
     if (p.settings().scale > 0) rememberedScale = p.settings().scale;
     setSize(720, 552);
+    updateLanguage();
     refresh(); startTimerHz(24);
 }
 NoteShaperEditor::~NoteShaperEditor() { stopTimer(); setLookAndFeel(nullptr); }
+
+juce::String NoteShaperEditor::translated(const char* en, const char* ru) const {
+    return juce::String::fromUTF8(russian ? ru : en);
+}
+void NoteShaperEditor::updateLanguage() {
+    const auto t = [this](const char* en, const char* ru) { return translated(en, ru); };
+    setTitle(t("NoteShaper — vocal pitch correction", u8"NoteShaper — подтяжка вокала"));
+    language.setToggleState(russian, juce::dontSendNotification);
+    language.setTitle(t("Interface language: English", u8"Язык интерфейса: русский"));
+    language.setTooltip(russian ? "Switch to English" : tr(u8"Переключить на русский"));
+    const auto populate = [](juce::ComboBox& box, const juce::StringArray& items, int first) {
+        const int selected = box.getSelectedId(); box.clear(juce::dontSendNotification);
+        for (int i = 0; i < items.size(); ++i) box.addItem(items[i], first + i);
+        box.setSelectedId(selected, juce::dontSendNotification);
+    };
+    populate(mode, {t("Note", u8"Нота"), t("Chord", u8"Аккорд"), t("Scale", u8"Гамма"), t("Custom", u8"Свой набор"), "MIDI"}, 1);
+    populate(chord, {t("Major", u8"Мажор"), t("Minor", u8"Минор"), t("Dominant 7th", u8"Доминантсептаккорд"),
+                    t("Major 7th", u8"Мажорный септаккорд"), t("Minor 7th", u8"Минорный септаккорд"), "Sus2", "Sus4", t("Fifth", u8"Квинта")}, 2);
+    populate(scale, {t("Major", u8"Мажор"), t("Minor", u8"Минор"), t("Harmonic minor", u8"Гармонич. минор"),
+                    t("Major pentatonic", u8"Мажорная пентатоника"), t("Minor pentatonic", u8"Минорная пентатоника")}, 1);
+    mode.setTitle(t("Target source", u8"Способ выбора нот"));
+    mode.setTooltip(t("Choose Note, Chord, Scale, Custom or MIDI, then the notes on the right.", u8"Выбери ноту, аккорд, гамму, свой набор или MIDI, затем ноты справа."));
+    root.setTitle(t("Root or target note", u8"Основная или целевая нота"));
+    root.setTooltip(t("Choose a note. The octave nearest to the voice is selected automatically.", u8"Выбери ноту. Октава подбирается рядом с голосом."));
+    chord.setTitle(t("Chord type", u8"Тип аккорда"));
+    chord.setTooltip(t("Allowed chord notes for one voice, without adding harmonies.", u8"Допустимые ноты аккорда для одного голоса, без создания дополнительных голосов."));
+    scale.setTitle(t("Scale type", u8"Тип гаммы"));
+    scale.setTooltip(t("Choose the song's scale and tonic.", u8"Выбери гамму и тонику песни."));
+    const juce::StringArray presetNames{t("Gentle", u8"Мягко"), t("Tight", u8"Плотно"), t("Rap", u8"Рэп")};
+    const juce::StringArray hints{
+        t("55% strength, 85 ms, 8 cents, vibrato on. Keeps target notes.", u8"55% силы, 85 мс, 8 центов, вибрато включено. Целевые ноты сохраняются."),
+        t("90% strength, 14 ms, 2 cents, vibrato off. Keeps target notes.", u8"90% силы, 14 мс, 2 цента, вибрато выключено. Целевые ноты сохраняются."),
+        t("100% strength, 0 ms, 0 cents, vibrato off. Hard tuning to the selected notes.", u8"100% силы, 0 мс, без допуска, вибрато выключено. Жёсткая подтяжка к выбранным нотам.")};
+    for (int i = 0; i < 3; ++i) { presets[i].setButtonText(presetNames[i]); presets[i].setTitle(presetNames[i]); presets[i].setTooltip(hints[i]); }
+    strength.setTitle(t("Correction strength", u8"Сила подтяжки"));
+    speed.setTitle(t("Retune time", u8"Время подтяжки"));
+    freedom.setTitle(t("Pitch freedom in cents", u8"Допуск отклонения в центах"));
+    strength.setTooltip(t("0% keeps the original pitch. 100% follows the target fully. Click the number to type a value.", u8"0% — исходная высота. 100% — полное следование цели. Нажми число для ввода значения."));
+    speed.setTooltip(t("0 ms gives sharp transitions. Longer times make correction gradual.", u8"0 мс — резкие переходы. Больше времени — плавнее подтяжка."));
+    freedom.setTooltip(t("Preserve small deviations within this allowance. 100 cents is one semitone.", u8"Сохранять небольшие отклонения в пределах допуска. 100 центов = полутон."));
+    speed.setTextValueSuffix(t(" ms", u8" мс")); freedom.setTextValueSuffix(t(" ct", u8" ц"));
+    for (auto* slider : {&strength, &speed, &freedom}) slider->updateText();
+    natural.setButtonText(t("Preserve vibrato", u8"Сохранить вибрато"));
+    natural.setTitle(t("Preserve vibrato", u8"Сохранить вибрато"));
+    natural.setTooltip(t("Correct the pitch centre while retaining more vibrato. Gentle enables this; Rap disables it.", u8"Подтягивать центр ноты, сохраняя больше вибрато. «Мягко» включает этот режим, «Рэп» выключает."));
+}
 
 unsigned NoteShaperEditor::targetMask() const {
     return processor.parameters.getRawParameterValue("midi")->load() > 0.5f
@@ -276,6 +336,8 @@ juce::String NoteShaperEditor::noteText(float value) const {
 }
 void NoteShaperEditor::timerCallback() { refresh(); }
 void NoteShaperEditor::refresh() {
+    const bool savedRussian = processor.parameters.state.getProperty("editorLanguage", "en").toString() == "ru";
+    if (savedRussian != russian) { russian = savedRussian; updateLanguage(); }
     const auto s = processor.settings();
     const bool byMidi = processor.parameters.getRawParameterValue("midi")->load() > 0.5f;
     const int targetMode = s.scale > 0 ? 2 : s.chord == 0 ? 0 : s.chord < 9 ? 1 : 3;
@@ -295,32 +357,29 @@ void NoteShaperEditor::refresh() {
         keys[i].setToggleState(byMidi || targetMode == 3 ? included : i == s.root, juce::dontSendNotification);
         keys[i].setEnabled(!byMidi);
         keys[i].setVisible(targetMode == 3 && !byMidi);
-        keys[i].setTooltip(targetMode == 3 ? juce::String(juce::String::fromUTF8(u8"Включить или исключить ")) + names[i]
-                                    : juce::String(juce::String::fromUTF8(u8"Выбрать основную ноту ")) + names[i]);
+        keys[i].setTooltip(translated("Include or exclude ", u8"Включить или исключить ") + names[i]);
         if (included) allowed.add(names[i]);
     }
     noteCaption.setVisible(byMidi || targetMode == 3 || targetMode == 0);
     noteCaption.setBounds(targetMode == 0 && !byMidi ? 344 : 224, 112, targetMode == 0 && !byMidi ? 344 : 464, 44);
-    noteCaption.setText(byMidi ? tr(u8"Направь MIDI на эту дорожку") : targetMode == 3
-                        ? (mask == 0 ? tr(u8"Нет нот — исходная высота") : tr(u8"Выбери ноты ниже"))
-                        : tr(u8"Октава подбирается к голосу"), juce::dontSendNotification);
+    noteCaption.setText(byMidi ? translated("Route MIDI to this track", u8"Направь MIDI на эту дорожку") : targetMode == 3
+                        ? (mask == 0 ? translated("No notes — original pitch", u8"Нет нот — исходная высота") : translated("Select notes below", u8"Выбери ноты ниже"))
+                        : translated("Nearest vocal octave", u8"Октава подбирается к голосу"), juce::dontSendNotification);
     summary.setVisible(byMidi || targetMode != 3);
-    summary.setText(mask == 0 ? juce::String(juce::String::fromUTF8(u8"Нет выбранных нот — исходная высота"))
-                    : juce::String::fromUTF8(u8"Вести к: ") + allowed.joinIntoString(juce::String::fromUTF8("  ·  ")), juce::dontSendNotification);
+    summary.setText(mask == 0 ? translated("No notes selected — original pitch", u8"Нет выбранных нот — исходная высота")
+                    : translated("Targets: ", u8"Вести к: ") + allowed.joinIntoString(juce::String::fromUTF8("  ·  ")), juce::dontSendNotification);
     summary.setColour(juce::Label::textColourId, mask == 0 ? text : muted);
     constexpr float amounts[] = {0.55f, 0.90f, 1.0f}, times[] = {85, 14, 0}, tolerances[] = {8, 2, 0};
-    int matchedPreset = 0;
-    for (int i = 0; i < 3; ++i) if (
+    for (int i = 0; i < 3; ++i) presets[i].setToggleState(
         std::abs(s.amount - amounts[i]) < 0.0005f && std::abs(s.speedMs - times[i]) < 0.05f
-        && std::abs(s.toleranceCents - tolerances[i]) < 0.05f && s.natural == (i == 0)) matchedPreset = i + 1;
-    preset.setSelectedId(matchedPreset, juce::dontSendNotification);
+        && std::abs(s.toleranceCents - tolerances[i]) < 0.05f && s.natural == (i == 0), juce::dontSendNotification);
     const float in = processor.detected.load();
     juce::String state;
-    if (mask == 0) state = byMidi ? juce::String(juce::String::fromUTF8(u8"MIDI: ждёт ноты")) : juce::String(juce::String::fromUTF8(u8"Нет выбранных нот"));
-    else if (s.amount < 0.001f) state = juce::String(juce::String::fromUTF8(u8"Исходная высота"));
-    else if (in < 0 || !std::isfinite(in)) state = byMidi ? juce::String(juce::String::fromUTF8(u8"MIDI · ждёт голос")) : juce::String(juce::String::fromUTF8(u8"Ждёт голос"));
+    if (mask == 0) state = byMidi ? translated("MIDI: waiting for notes", u8"MIDI: ждёт ноты") : translated("No notes selected", u8"Нет выбранных нот");
+    else if (s.amount < 0.001f) state = translated("Original pitch", u8"Исходная высота");
+    else if (in < 0 || !std::isfinite(in)) state = byMidi ? translated("MIDI · waiting for voice", u8"MIDI · ждёт голос") : translated("Waiting for voice", u8"Ждёт голос");
     else state = (byMidi ? juce::String::fromUTF8("MIDI · ") : "") + noteText(in) + tr(u8"  →  ") + noteText(processor.destination.load())
-                 + "   " + (processor.cents.load() >= 0 ? "+" : "") + juce::String(static_cast<int>(std::round(processor.cents.load()))) + tr(u8" ц");
+                 + "   " + (processor.cents.load() >= 0 ? "+" : "") + juce::String(static_cast<int>(std::round(processor.cents.load()))) + translated(" ct", u8" ц");
     status.setText(state, juce::dontSendNotification);
     status.setColour(juce::Label::textColourId, muted);
     repaint();
@@ -329,13 +388,12 @@ void NoteShaperEditor::refresh() {
 void NoteShaperEditor::paint(juce::Graphics& g) {
     g.fillAll(background);
     label(g, "NoteShaper", {32, 24, 260, 24}, valueSize, text);
-    label(g, tr(u8"Подтяжка вокала"), {420, 24, 268, 24}, captionSize, muted, juce::Justification::right);
     g.setFont(uiFont(bodySize, juce::Font::bold)); g.setColour(text);
-    g.drawText(tr(u8"Ноты"), juce::Rectangle<int>(32, 80, 280, 24), juce::Justification::left);
-    g.drawText(tr(u8"Коррекция"), juce::Rectangle<int>(32, 248, 280, 24), juce::Justification::left);
-    label(g, tr(u8"Сила"), {48, 296, 176, 24}, bodySize, text, juce::Justification::centred);
-    label(g, tr(u8"Время"), {272, 296, 176, 24}, bodySize, text, juce::Justification::centred);
-    label(g, tr(u8"Допуск"), {496, 296, 176, 24}, bodySize, text, juce::Justification::centred);
+    g.drawText(translated("Targets", u8"Ноты"), juce::Rectangle<int>(32, 80, 280, 24), juce::Justification::left);
+    g.drawText(translated("Correction", u8"Коррекция"), juce::Rectangle<int>(32, 248, 280, 24), juce::Justification::left);
+    label(g, translated("Strength", u8"Сила"), {48, 296, 176, 24}, bodySize, text, juce::Justification::centred);
+    label(g, translated("Retune", u8"Время"), {272, 296, 176, 24}, bodySize, text, juce::Justification::centred);
+    label(g, translated("Freedom", u8"Допуск"), {496, 296, 176, 24}, bodySize, text, juce::Justification::centred);
     g.setColour(line);
     for (int y : {64, 224, 480}) g.drawHorizontalLine(y, 32, 688);
 }
@@ -347,6 +405,7 @@ void NoteShaperEditor::resized() {
     for (int i = 0; i < 12; ++i) keys[i].setBounds(32 + i * 55, 164, 51, 44);
     summary.setBounds(32, 176, 656, 24);
     natural.setBounds(32, 488, 280, 44);
-    preset.setBounds(480, 240, 208, 44);
+    for (int i = 0; i < 3; ++i) presets[i].setBounds(384 + i * 104, 240, 96, 44);
+    language.setBounds(612, 16, 76, 44);
     strength.setBounds(48, 320, 176, 144); speed.setBounds(272, 320, 176, 144); freedom.setBounds(496, 320, 176, 144);
 }

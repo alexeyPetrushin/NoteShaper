@@ -1,3 +1,3 @@
 PASS: direct note/chord selection, custom continuity, empty state, presets, strength, three visible rotary controls, MIDI visibility, legacy state, host automation
 PASS: scales, natural voice, new parameter state, sustain/channel isolation/duplicate notes/panic, reset meters
-PASS: real native editor renders 720 x 552; eleven state screenshots; consistent source/preset pickers, numeric typing and non-overlapping controls
+PASS: real native editor renders 720 x 552; twelve state screenshots; English default, RU/EN switch and saved language, direct preset buttons, numeric typing and non-overlapping controls

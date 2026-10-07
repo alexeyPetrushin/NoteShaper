@@ -88,12 +88,31 @@ int main(int argc, char** argv) {
         int visibleControls = 0;
         for (auto* c : e->getChildren()) if (c->isVisible() &&
             (dynamic_cast<juce::Button*>(c) || dynamic_cast<juce::Slider*>(c) || dynamic_cast<juce::ComboBox*>(c))) ++visibleControls;
-        expect(visibleControls == 8, "chord mode has redundant controls");
+        expect(visibleControls == 11, "chord mode has redundant controls");
         expect(component(*e, "root").isVisible() && !component(*e, "note0").isVisible(), "normal mode shows competing root controls");
-        expect(control<juce::ComboBox>(*e, "preset").getSelectedId() == 3, "hard preset state wrong");
+        expect(control<juce::Button>(*e, "preset2").getToggleState(), "hard preset state wrong");
         expect(component(*e, "speed").isVisible() && component(*e, "tolerance").isVisible(), "three controls not visible");
         for (const auto& id : {"amount", "speed", "tolerance"})
             expect(control<juce::Slider>(*e, id).getSliderStyle() == juce::Slider::RotaryHorizontalVerticalDrag, "rotary control missing");
+        expect(!control<juce::Button>(*e, "language").getToggleState(), "new instance does not default to English");
+        expect(control<juce::ComboBox>(*e, "mode").getItemText(1) == "Chord", "English source labels missing");
+        expect(control<juce::Button>(*e, "preset2").getButtonText() == "Rap", "English presets missing");
+        const auto languageMask = notefollow::noteMask(p.settings());
+        click(*e, "language");
+        expect(control<juce::ComboBox>(*e, "mode").getItemText(1) == juce::String::fromUTF8(u8"Аккорд"), "Russian source labels missing");
+        expect(control<juce::Button>(*e, "preset2").getButtonText() == juce::String::fromUTF8(u8"Рэп"), "Russian presets missing");
+        expect(control<juce::Slider>(*e, "speed").getTextValueSuffix().contains(juce::String::fromUTF8(u8"мс")), "Russian units missing");
+        expect(notefollow::noteMask(p.settings()) == languageMask && p.settings().amount == 1.0f, "language changed audio settings");
+        layout(*e); render(*e, out.getChildFile("Design/Russian.png"));
+        juce::MemoryBlock languageState; p.getStateInformation(languageState);
+        e.reset(); e.reset(p.createEditor()); e->setVisible(true); settle();
+        expect(control<juce::Button>(*e, "language").getToggleState(), "language not retained after reopening");
+        click(*e, "language");
+        p.setStateInformation(languageState.getData(), static_cast<int>(languageState.getSize())); settle();
+        expect(control<juce::Button>(*e, "language").getToggleState(), "saved language not reflected in open editor");
+        click(*e, "language");
+        expect(control<juce::ComboBox>(*e, "mode").getItemText(1) == "Chord", "return to English failed");
+        expect(control<juce::Slider>(*e, "speed").getTextValueSuffix().contains("ms"), "English units missing");
         selectRoot(*e, 0);
         expect(p.settings().root == 0 && p.settings().chord == 2, "chord root selection edited note set");
         expect(notefollow::noteMask(p.settings()) == ((1u << 0) | (1u << 3) | (1u << 7)), "wrong C minor targets");
@@ -108,7 +127,7 @@ int main(int argc, char** argv) {
         layout(*e); render(*e, out.getChildFile("Design/Custom.png"));
         click(*e, "note0");
         expect(notefollow::noteMask(p.settings()) == 0u, "empty custom set failed");
-        expect(control<juce::Label>(*e, "noteCaption").getText().contains(juce::String(juce::String::fromUTF8(u8"исходная высота"))), "empty set not explained");
+        expect(control<juce::Label>(*e, "noteCaption").getText().contains("original pitch"), "empty set not explained");
         render(*e, out.getChildFile("Design/Empty.png"));
         select(*e, "mode", 2);
         expect(p.settings().chord == 2, "previous chord not remembered");
@@ -126,21 +145,21 @@ int main(int argc, char** argv) {
         select(*e, "mode", 3);
         expect(p.settings().scale == 2, "previous scale not remembered");
         select(*e, "mode", 2);
-        select(*e, "preset", 1);
+        click(*e, "preset0");
         const auto targetBefore = notefollow::noteMask(p.settings());
         expect(std::abs(p.settings().amount - 0.55f) < 0.001f && p.settings().speedMs == 85, "soft preset failed");
-        expect(p.settings().chord == 4 && (control<juce::ComboBox>(*e, "preset").getSelectedId() == 1), "preset changed notes");
+        expect(p.settings().chord == 4 && control<juce::Button>(*e, "preset0").getToggleState(), "preset changed notes");
         expect(p.settings().natural && control<juce::Button>(*e, "natural").getToggleState(), "soft preset does not enable natural voice");
         render(*e, out.getChildFile("Design/Natural.png"));
         click(*e, "natural");
-        expect(!p.settings().natural && !(control<juce::ComboBox>(*e, "preset").getSelectedId() == 1), "natural toggle or preset highlight failed");
+        expect(!p.settings().natural && !control<juce::Button>(*e, "preset0").getToggleState(), "natural toggle or preset highlight failed");
         control<juce::Slider>(*e, "amount").setValue(42, juce::sendNotificationSync); settle();
         expect(std::abs(p.settings().amount - 0.42f) < 0.001f, "strength did not reach parameter");
-        expect(!(control<juce::ComboBox>(*e, "preset").getSelectedId() == 1), "manual settings not reflected");
+        expect(!control<juce::Button>(*e, "preset0").getToggleState(), "manual settings not reflected");
         expect(notefollow::noteMask(p.settings()) == targetBefore, "strength changed notes");
         control<juce::Slider>(*e, "amount").setValue(0, juce::sendNotificationSync); settle();
         expect(p.settings().amount == 0, "zero strength failed");
-        expect(control<juce::Label>(*e, "status").getText().contains(juce::String::fromUTF8(u8"Исходная высота")), "zero strength not explained");
+        expect(control<juce::Label>(*e, "status").getText().contains("Original pitch"), "zero strength not explained");
         render(*e, out.getChildFile("Design/Zero.png"));
         control<juce::Slider>(*e, "amount").setValue(42, juce::sendNotificationSync); settle();
         auto& speedSlider = control<juce::Slider>(*e, "speed");
@@ -208,7 +227,7 @@ int main(int argc, char** argv) {
         p.reset(); expect(p.detected.load() < 0 && p.destination.load() < 0 && p.cents.load() == 0 && p.certainty.load() == 0, "reset left stale meters");
         std::cout << "PASS: direct note/chord selection, custom continuity, empty state, presets, strength, three visible rotary controls, MIDI visibility, legacy state, host automation\n";
         std::cout << "PASS: scales, natural voice, new parameter state, sustain/channel isolation/duplicate notes/panic, reset meters\n";
-        std::cout << "PASS: real native editor renders 720 x 552; eleven state screenshots; consistent source/preset pickers, numeric typing and non-overlapping controls\n";
+        std::cout << "PASS: real native editor renders 720 x 552; twelve state screenshots; English default, RU/EN switch and saved language, direct preset buttons, numeric typing and non-overlapping controls\n";
         return 0;
     } catch (const std::exception& x) { std::cerr << "FAIL: " << x.what() << '\n'; return 1; }
 }

@@ -2,30 +2,32 @@
 
 ## Flow / Сценарий
 
-The primary task is to choose the pitches a voice should follow, then adjust the correction. Version 0.5.1 follows one top-to-bottom flow in a fixed 720 × 552 editor:
+The primary task is to choose the pitches a voice should follow, then adjust correction. Version 0.5.1 uses one top-to-bottom flow in a 720 × 552 editor:
 
-1. **Targets:** the first dropdown selects Note, Chord, Scale, Custom or MIDI. Relevant note/type choices follow on the same row. Custom alone reveals the twelve note buttons below.
-2. **Correction:** choose Gentle, Tight or Rap from one dropdown, or adjust the three knobs directly. A manual change displays “Вручную” (Manual). Presets retain target notes.
-3. **Listen and adjust:** Natural Voice and the detected → target/cents readout share a quiet footer.
+1. **Targets:** the first dropdown selects Note, Chord, Scale, Custom or MIDI. Relevant note/type choices follow on the same row. Only Custom reveals twelve note buttons below.
+2. **Correction:** Gentle, Tight and Rap are three directly visible buttons. No dropdown or group wrapper surrounds them. Choose one in a single click or adjust the three knobs immediately. Presets retain target notes; manual changes clear selection.
+3. **Listen:** Preserve vibrato and the detected → target/cents readout sit in the footer.
 
-Основной сценарий: сначала выбрать ноты, затем настроить подтяжку. MIDI — один из способов выбора нот, поэтому находится в том же списке. Готовая настройка необязательна: ручки всегда доступны. В «Своём наборе» включаются отдельные ноты; переход из аккорда или гаммы сохраняет текущие цели.
+Ноты сверху, коррекция ниже. MIDI находится среди способов выбора нот. «Мягко», «Плотно» и «Рэп» доступны одним нажатием, три крутилки доступны сразу. Вложенных экранов настроек и подтверждений нет.
+
+## Language / Язык
+
+New instances open in English. One EN / RU button replaces the old subtitle at the top right. The active language is bold. One click translates labels, menus, units, tooltips and accessible control titles. The choice is retained on reopening and in the saved project through UI metadata; no host/audio parameter is added. Legacy states without this metadata open in English.
+
+Английский по умолчанию, одно нажатие EN / RU переключает язык всего интерфейса. Выбор сохраняется в проекте; звуковые настройки и идентификаторы параметров не меняются.
 
 ## Consistency / Единообразие
 
-One typeface, Segoe UI, is used throughout. The scale is 14 px for supporting information, 18 px for controls and section labels, and 20 px for the product name and numeric values. Bold is limited to the two section labels. All dropdowns and note/checkbox interaction areas are 44 px high. The outer margin is 32 px; the target row uses 16 px gaps. Surfaces use white, cool grey and graphite, with one border/radius treatment for dropdowns and note buttons.
+One typeface, Segoe UI. Three sizes: 14 px supporting information, 18 px controls/section labels, 20 px product name/values. Bold is reserved for section labels and the active language. Main controls are 44 px high. Outer margin 32 px, field gaps 16 px, preset gaps 8 px. White, cool grey and graphite; one border/radius treatment for dropdowns and buttons. Editable values have no permanent background; hover/focus reveals the field.
 
-The normal chord view has **8 visible controls instead of 14**: four dropdowns, three knobs and one checkbox. No control is wrapped in another button-like surface. Values appear as text below the knobs; hover/focus reveals that they can be edited. Tooltips provide detailed explanations without repeated labels in the main flow. Focus rings remain visible.
+The chord view exposes 11 controls including language, versus 14 before. No control is nested in another button-like container. A source change takes open + select; presets and custom notes each take one click.
 
-Одна семья шрифта, три размера, одинаковая высота списков и кнопок. Убраны контейнеры сегментов, дублирующие подписи и постоянные плашки под числами. В обычном режиме аккорда осталось 8 элементов управления вместо 14. Ни один блок целиком не выглядит нажимаемой кнопкой.
+Один шрифт, три размера, одинаковая высота и оформление управления. В режиме аккорда — 11 элементов вместе с языком вместо 14. Убраны контейнеры сегментов, повторные пояснения и постоянные плашки под числами.
 
-## First audit / Первый аудит
+## Two audit passes / Два прохода
 
-The 0.5.0 screen mixed large note/type fields, two segmented groups, a separate MIDI switch, small secondary captions and value pills. These introduced competing reading directions and many text sizes. The correction was to consolidate mutually exclusive target sources, consolidate optional starting presets, keep the three knobs, and standardise type/control geometry. Existing functions remain accessible without a submenu or modal.
+The first pass identified competing segmented groups, a separate MIDI override, oversized fields and repeated labels. The final layout consolidates target selection and standardises control geometry while keeping all three presets directly visible.
 
-Trade-off: selecting a source or preset now takes two pointer clicks (open and select), versus one for the old segments. This lowers persistent control count; keyboard selection remains available. Custom notes still take one click each. No additional confirmation or nested settings screen is introduced.
+The second pass inspected twelve native states in the final flow, including English/Russian, all target modes, empty sets, manual settings and MIDI. Initial control text was too small and increased to 18 px. Long labels fit, selection is visible, and the correction area remains stationary when modes change. Native checks verify language restoration, unchanged tuning settings during translation, direct presets, numeric entry, target continuity and non-overlapping controls.
 
-На первом проходе найдены конкурирующие группы управления и разные масштабы текста. Выбор источника и пресета теперь требует двух кликов вместо одного; это осознанный обмен на более спокойный экран. Вложенных меню и подтверждений нет, отдельные ноты включаются одним кликом.
-
-## Second audit / Второй аудит
-
-Eleven native states were rendered and inspected. The first renders showed that 16 px control text was too small beside the knobs; it was increased to 18 px and rechecked. Interaction checks passed for all modes, empty custom sets, presets/manual state, editable numbers, MIDI entry/exit, host automation and saved-state restoration. The editor keeps fixed section positions when modes change. This is an expert/code review, not a user study. See [validation](VALIDATION.md) for the completed build checks.
+Это экспертный аудит и проверки кода, не пользовательское исследование. See [validation](VALIDATION.md) for build checks and limits.

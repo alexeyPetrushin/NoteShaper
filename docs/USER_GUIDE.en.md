@@ -20,14 +20,14 @@ If the entire NoteFollow package was previously copied into the system folder, t
 
 ## Interface labels
 
-The interface is currently Russian. These are the main controls:
+New instances open in English. Click **EN / RU** in the top-right corner to toggle English and Russian. The active language is bold; the choice is retained when reopening the editor and saved with the project. The main labels are:
 
 | Label | Meaning |
 |---|---|
 | Нота / Аккорд / Гамма / Свой набор | Note / Chord / Scale / Custom |
 | Мягко / Плотно / Рэп | Gentle / Tight / Rap |
 | Сила / Время / Допуск | Strength / Retune time / Pitch freedom |
-| Сохранить вибрато | Natural Voice |
+| Сохранить вибрато | Preserve vibrato |
 | MIDI | MIDI targets |
 
 ## Choosing targets
@@ -40,7 +40,7 @@ The interface is currently Russian. These are the main controls:
 
 **Custom:** click notes to include or exclude them. Switching to Custom retains the current chord or scale. An empty set keeps the original pitch.
 
-In the top “Ноты” (Targets) area, use the first dropdown to choose Note, Chord, Scale, Custom or MIDI, then choose the note and chord/scale type on the right. Below, “Коррекция” (Correction) contains a preset dropdown and the three knobs. You can adjust the knobs directly without choosing a preset. Individual note buttons appear only in Custom. “Вести к” lists allowed pitch classes; Custom shows them through selected note buttons. For a vocal melody, a song scale is often more appropriate than a chord: a major triad has three notes, while a major scale has seven. NoteShaper corrects toward the nearest allowed note.
+In the top “Targets” (“Ноты”) area, use the first dropdown to choose Note, Chord, Scale, Custom or MIDI, then choose the note and chord/scale type on the right. Below, “Correction” (“Коррекция”) contains three directly visible preset buttons and the three knobs. You can adjust the knobs directly without choosing a preset. Individual note buttons appear only in Custom. “Вести к” lists allowed pitch classes; Custom shows them through selected note buttons. For a vocal melody, a song scale is often more appropriate than a chord: a major triad has three notes, while a major scale has seven. NoteShaper corrects toward the nearest allowed note.
 
 ## The three controls
 
@@ -54,23 +54,23 @@ Drag a rotary control vertically or click its numeric value to type a number.
 
 ## Starting points
 
-| Preset | Strength | Retune time | Freedom | Natural Voice |
+| Preset | Strength | Retune time | Freedom | Preserve vibrato |
 |---|---:|---:|---:|---|
 | Gentle | 55% | 85 ms | 8 cents | On |
 | Tight | 90% | 14 ms | 2 cents | Off |
 | Rap | 100% | 0 ms | 0 | Off |
 
-Use the dropdown beside “Коррекция” to choose a preset. Presets retain your target notes. Changing any preset-controlled setting manually changes the displayed preset to “Вручную” (Manual).
+Click Gentle, Tight or Rap beside “Correction”. Presets retain your target notes. Changing any preset-controlled setting manually clears the preset selection. All three buttons remain directly visible.
 
 For obvious hard tuning, select Rap. Use Note to deliberately constrain the voice to one pitch class, or the song's Scale for a stepped melody. For subtle correction, start with Gentle and adjust strength and time by ear.
 
-**Natural Voice** corrects a smoothed pitch centre, retaining more rapid small movements such as vibrato. It also holds the target through brief fluctuations near a note boundary. Large transitions bypass the boundary-duration check. This is a simplified algorithm whose result depends on the voice and settings.
+**Preserve vibrato** corrects a smoothed pitch centre, retaining more rapid small movements such as vibrato. It also holds the target through brief fluctuations near a note boundary. Large transitions bypass the boundary-duration check. This is a simplified algorithm whose result depends on the voice and settings.
 
 ## MIDI
 
 1. Create a separate MIDI track with a clip or keyboard input.
 2. Route **MIDI To** to the audio track containing NoteShaper; choose the plug-in in the lower destination selector.
-3. Choose **MIDI** in the first dropdown under “Ноты”. To return to manual targets, select Note, Chord, Scale or Custom in that same dropdown.
+3. Choose **MIDI** in the first dropdown under “Targets”. To return to manual targets, select Note, Chord, Scale or Custom in that same dropdown.
 
 Incoming notes define allowed pitch classes, not exact vocal octaves. A MIDI chord supplies several possible targets for one voice. Sustain (CC64) holds released notes until pedal release, independently on each MIDI channel.
 
@@ -80,7 +80,7 @@ With no pressed or sustained notes, pitch is unchanged. Manual targets are disab
 
 The bottom-right readout shows detected pitch, target pitch and correction in cents. It is visually secondary to the target pickers and three rotary controls. «Ждёт голос» means the detector is waiting for a stable voice. «MIDI: ждёт ноты» means MIDI is not supplying targets.
 
-Compare processed and original vocals, listening to consonants, note endings and transitions. If the target is wrong, check the scale and tonic first. For overly obvious tuning, increase retune time, reduce strength or enable Natural Voice. An empty target set and 0% strength should keep the original pitch.
+Compare processed and original vocals, listening to consonants, note endings and transitions. If the target is wrong, check the scale and tonic first. For overly obvious tuning, increase retune time, reduce strength or enable Preserve vibrato. An empty target set and 0% strength should keep the original pitch.
 
 ## Limitations
 
