@@ -3,7 +3,7 @@
 ## 0.5.0 — 2026-10-07
 
 - Light, mostly monochrome interface with geometric controls and three visible knobs.
-- Larger numeric fields, flat dial surfaces, explicit check marks and neutral active states.
+- Editable numeric fields, switches and clear segment selection; the 12-note grid appears only in Custom.
 - Russian and English installation, user and build guides.
 - Processing and saved parameter identity retained from 0.4.
 
