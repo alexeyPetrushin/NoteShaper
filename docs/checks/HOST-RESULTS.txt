@@ -1,4 +1,4 @@
 Scanned: NoteShaper / VST3
 Parameter count: 2101
-PASS: state from legacy 0.3.0 binary restores all 18 parameters in NoteShaper 0.5, same VST3 identity; new settings default off
+PASS: state from legacy 0.3.0 binary restores all 18 parameters in NoteShaper 0.5.1, same VST3 identity; new settings default off
 PASS: VST3 scan/load, stereo, state restore, native editor creation, MIDI note-off, latency

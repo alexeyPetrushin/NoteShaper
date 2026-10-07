@@ -1,5 +1,16 @@
 # Changelog / Изменения
 
+## 0.5.1 — 2026-10-08
+
+- One target-source dropdown includes Note, Chord, Scale, Custom and MIDI.
+- Presets use one dropdown; manual changes display “Вручную” (Manual).
+- Consistent Segoe UI typography, control heights and spacing; three rotary controls retained.
+- Removed segmented-control containers, duplicate helper labels and permanent value-field backgrounds.
+- Compact 720 × 552 editor; processing and saved parameter identity unchanged.
+- DonationAlerts support links in both READMEs.
+
+Единый порядок: способ выбора нот → ноты → коррекция. Два списка заменяют группы кнопок и отдельный MIDI-переключатель. Сохранены три крутилки и ввод чисел; интерфейс стал ниже и использует одну шрифтовую семью и три размера.
+
 ## 0.5.0 — 2026-10-07
 
 - Light, mostly monochrome interface with geometric controls and three visible knobs.

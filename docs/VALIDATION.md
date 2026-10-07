@@ -2,11 +2,11 @@
 
 ## English
 
-Release 0.5.0 was built for Windows x64. The packaged VST3 was scanned and loaded in a JUCE host, and the native editor was rendered in nine states at 720 × 624.
+Release 0.5.1 was built for Windows x64. The packaged VST3 was scanned and loaded in a JUCE host, and the native editor was rendered in eleven states at 720 × 552.
 
-The UI check covers target selection, scales, scale-to-custom continuity, three visible knobs, numeric values, presets, Natural Voice, MIDI waiting, parameter automation and state restoration. Native processor checks also cover sustain, independent MIDI channels, repeated notes, All Notes Off, All Sound Off, Reset Controllers and meter reset.
+The UI check additionally verifies non-overlapping controls, direct numeric typing, unified source/preset selection and exiting MIDI without losing the remembered chord. It covers target selection, scales, scale-to-custom continuity, three visible knobs, numeric values, presets, Natural Voice, MIDI waiting, parameter automation and state restoration. Native processor checks also cover sustain, independent MIDI channels, repeated notes, All Notes Off, All Sound Off, Reset Controllers and meter reset.
 
-The 0.5 host check used a retained NoteFollow 0.3 binary to confirm the same VST3 identity and restoration of all 18 legacy parameters. The original 0.1 binary had passed this check for release 0.4; processor/DSP source is unchanged in 0.5. New scale/natural settings reset to off when absent from an old state.
+The 0.5.1 host check used a retained NoteFollow 0.3 binary to confirm the same VST3 identity and restoration of all 18 legacy parameters. The original 0.1 binary had passed this check for release 0.4; processor/DSP source is unchanged in 0.5. New scale/natural settings reset to off when absent from an old state.
 
 DSP source is unchanged from 0.4. Its regression results are retained: 24 settled pitch cases at 44.1/48/96/192 kHz had maximum error below 0.22 cents on synthetic harmonic signals. The checks also cover exact delayed dry output at 0%/empty targets, partial pitch correction, chords/scales, noise/silence, block-size independence, retune onset/re-attack, deliberate melody changes and opposite-polarity stereo.
 
@@ -16,9 +16,9 @@ The fixed reported delay is 3072 samples at 48 kHz, or 64 ms. These are syntheti
 
 ## Русский
 
-Сборка 0.5.0 проверена в VST3-хосте. Реальный нативный интерфейс отрисован в девяти состояниях при 720 × 624: выбор целей, гаммы, переход в свой набор, три крутилки, значения, пресеты, «Сохранить вибрато», MIDI, автоматизация и сохранение состояния.
+Сборка 0.5.1 проверена в VST3-хосте. Реальный нативный интерфейс отрисован в одиннадцати состояниях при 720 × 552: выбор целей, гаммы, переход в свой набор, три крутилки, значения, пресеты, «Сохранить вибрато», MIDI, автоматизация и сохранение состояния.
 
-Проверены педаль sustain, независимые каналы, повторные ноты, отпускание, аварийное снятие нот и сброс показаний. Версия 0.5 загрузила прежние 18 параметров из сохранённого NoteFollow 0.3; исходная 0.1 прошла эту проверку для релиза 0.4, а код процессора в 0.5 не изменён. Отсутствующие новые параметры выключаются.
+Также проверены отсутствие перекрытия элементов, ввод числа с клавиатуры и выход из MIDI без потери прежнего аккорда. Проверены педаль sustain, независимые каналы, повторные ноты, отпускание, аварийное снятие нот и сброс показаний. Версия 0.5.1 загрузила прежние 18 параметров из сохранённого NoteFollow 0.3; исходная 0.1 прошла эту проверку для релиза 0.4, а код процессора в 0.5 не изменён. Отсутствующие новые параметры выключаются.
 
 Движок версии 0.4 не изменён. На 24 синтетических гармонических сигналах при 44.1/48/96/192 кГц установившаяся ошибка была меньше 0,22 цента. Также проверены исходный сигнал при 0% и пустом наборе, частичная правка, гаммы/аккорды, шум/тишина, размеры блоков, начало фраз, смена мелодии и противоположная полярность стерео.
 

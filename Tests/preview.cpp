@@ -26,6 +26,11 @@ void settle() {
 void click(juce::AudioProcessorEditor& e, const juce::String& id) {
     control<juce::Button>(e, id).triggerClick(); settle();
 }
+void select(juce::AudioProcessorEditor& e, const juce::String& id, int choice) {
+    auto& picker = control<juce::ComboBox>(e, id);
+    expect(picker.isVisible() && picker.isEnabled(), "picker unavailable");
+    picker.setSelectedId(choice, juce::sendNotificationSync); settle();
+}
 void selectRoot(juce::AudioProcessorEditor& e, int note) {
     auto& root = control<juce::ComboBox>(e, "root");
     expect(root.isVisible() && root.isEnabled(), "root picker unavailable");
@@ -55,6 +60,11 @@ void layout(juce::AudioProcessorEditor& e) {
         if (dynamic_cast<juce::Button*>(c) || dynamic_cast<juce::Slider*>(c) || dynamic_cast<juce::ComboBox*>(c))
             expect(c->getHeight() >= 44, "interactive target too small");
     }
+    std::vector<juce::Component*> interactive;
+    for (auto* c : e.getChildren()) if (c->isVisible() &&
+        (dynamic_cast<juce::Button*>(c) || dynamic_cast<juce::Slider*>(c) || dynamic_cast<juce::ComboBox*>(c))) interactive.push_back(c);
+    for (size_t i = 0; i < interactive.size(); ++i) for (size_t j = i + 1; j < interactive.size(); ++j)
+        expect(!interactive[i]->getBounds().intersects(interactive[j]->getBounds()), "interactive controls overlap");
 }
 int main(int argc, char** argv) {
     try {
@@ -72,79 +82,97 @@ int main(int argc, char** argv) {
             p.processBlock(b, m);
         }
         std::unique_ptr<juce::AudioProcessorEditor> e(p.createEditor()); e->setVisible(true); settle();
-        expect(e->getWidth() == 720 && e->getHeight() == 624, "wrong compact size");
+        expect(e->getWidth() == 720 && e->getHeight() == 552, "wrong compact size");
         layout(*e); render(*e, out.getChildFile("Preview.png"));
+        expect(control<juce::ComboBox>(*e, "mode").getNumItems() == 5, "target choices incomplete");
+        int visibleControls = 0;
+        for (auto* c : e->getChildren()) if (c->isVisible() &&
+            (dynamic_cast<juce::Button*>(c) || dynamic_cast<juce::Slider*>(c) || dynamic_cast<juce::ComboBox*>(c))) ++visibleControls;
+        expect(visibleControls == 8, "chord mode has redundant controls");
         expect(component(*e, "root").isVisible() && !component(*e, "note0").isVisible(), "normal mode shows competing root controls");
-        expect(control<juce::Button>(*e, "preset2").getToggleState(), "hard preset state wrong");
+        expect(control<juce::ComboBox>(*e, "preset").getSelectedId() == 3, "hard preset state wrong");
         expect(component(*e, "speed").isVisible() && component(*e, "tolerance").isVisible(), "three controls not visible");
         for (const auto& id : {"amount", "speed", "tolerance"})
             expect(control<juce::Slider>(*e, id).getSliderStyle() == juce::Slider::RotaryHorizontalVerticalDrag, "rotary control missing");
         selectRoot(*e, 0);
         expect(p.settings().root == 0 && p.settings().chord == 2, "chord root selection edited note set");
         expect(notefollow::noteMask(p.settings()) == ((1u << 0) | (1u << 3) | (1u << 7)), "wrong C minor targets");
-        click(*e, "mode0"); selectRoot(*e, 9);
+        select(*e, "mode", 1); selectRoot(*e, 9);
         expect(p.settings().chord == 0 && notefollow::noteMask(p.settings()) == (1u << 9), "single A picker selection failed");
         render(*e, out.getChildFile("Design/Single.png"));
-        click(*e, "mode3");
+        select(*e, "mode", 4);
         expect(!component(*e, "root").isVisible() && component(*e, "note0").isVisible(), "custom disclosure failed");
         expect(p.settings().chord == 10 && notefollow::noteMask(p.settings()) == (1u << 9), "custom mode lost current target");
         click(*e, "note0"); click(*e, "note9");
         expect(notefollow::noteMask(p.settings()) == 1u, "custom set edits failed");
+        layout(*e); render(*e, out.getChildFile("Design/Custom.png"));
         click(*e, "note0");
         expect(notefollow::noteMask(p.settings()) == 0u, "empty custom set failed");
-        expect(control<juce::Label>(*e, "summary").getText().contains(juce::String(juce::String::fromUTF8(u8"исходная высота"))), "empty set not explained");
+        expect(control<juce::Label>(*e, "noteCaption").getText().contains(juce::String(juce::String::fromUTF8(u8"исходная высота"))), "empty set not explained");
         render(*e, out.getChildFile("Design/Empty.png"));
-        click(*e, "mode1");
+        select(*e, "mode", 2);
         expect(p.settings().chord == 2, "previous chord not remembered");
         control<juce::ComboBox>(*e, "chord").setSelectedId(5, juce::sendNotificationSync); settle();
         expect(p.settings().chord == 4, "chord menu mapping failed");
-        click(*e, "mode2");
+        select(*e, "mode", 3);
         expect(p.settings().root == 9, "scale mode lost selected root");
         selectRoot(*e, 0);
         expect(p.settings().scale == 1 && notefollow::noteMask(p.settings()) == 0xab5, "major scale mode failed");
         control<juce::ComboBox>(*e, "scale").setSelectedId(2, juce::sendNotificationSync); selectRoot(*e, 9);
         expect(p.settings().root == 9 && p.settings().scale == 2 && notefollow::noteMask(p.settings()) == 0xab5, "A minor scale selection failed");
         layout(*e); render(*e, out.getChildFile("Design/Scale.png"));
-        click(*e, "mode3");
+        select(*e, "mode", 4);
         expect(p.settings().scale == 0 && notefollow::noteMask(p.settings()) == 0xab5, "scale-to-custom continuity failed");
-        click(*e, "mode2");
+        select(*e, "mode", 3);
         expect(p.settings().scale == 2, "previous scale not remembered");
-        click(*e, "mode1");
-        click(*e, "preset0");
+        select(*e, "mode", 2);
+        select(*e, "preset", 1);
         const auto targetBefore = notefollow::noteMask(p.settings());
         expect(std::abs(p.settings().amount - 0.55f) < 0.001f && p.settings().speedMs == 85, "soft preset failed");
-        expect(p.settings().chord == 4 && control<juce::Button>(*e, "preset0").getToggleState(), "preset changed notes");
+        expect(p.settings().chord == 4 && (control<juce::ComboBox>(*e, "preset").getSelectedId() == 1), "preset changed notes");
         expect(p.settings().natural && control<juce::Button>(*e, "natural").getToggleState(), "soft preset does not enable natural voice");
         render(*e, out.getChildFile("Design/Natural.png"));
         click(*e, "natural");
-        expect(!p.settings().natural && !control<juce::Button>(*e, "preset0").getToggleState(), "natural toggle or preset highlight failed");
+        expect(!p.settings().natural && !(control<juce::ComboBox>(*e, "preset").getSelectedId() == 1), "natural toggle or preset highlight failed");
         control<juce::Slider>(*e, "amount").setValue(42, juce::sendNotificationSync); settle();
         expect(std::abs(p.settings().amount - 0.42f) < 0.001f, "strength did not reach parameter");
-        expect(!control<juce::Button>(*e, "preset0").getToggleState(), "stale preset highlight");
+        expect(!(control<juce::ComboBox>(*e, "preset").getSelectedId() == 1), "manual settings not reflected");
         expect(notefollow::noteMask(p.settings()) == targetBefore, "strength changed notes");
         control<juce::Slider>(*e, "amount").setValue(0, juce::sendNotificationSync); settle();
         expect(p.settings().amount == 0, "zero strength failed");
         expect(control<juce::Label>(*e, "status").getText().contains(juce::String::fromUTF8(u8"Исходная высота")), "zero strength not explained");
         render(*e, out.getChildFile("Design/Zero.png"));
         control<juce::Slider>(*e, "amount").setValue(42, juce::sendNotificationSync); settle();
-        control<juce::Slider>(*e, "speed").setValue(32.5, juce::sendNotificationSync);
+        auto& speedSlider = control<juce::Slider>(*e, "speed");
+        juce::Label* speedField = nullptr;
+        for (auto* c : speedSlider.getChildren()) if (auto* l = dynamic_cast<juce::Label*>(c)) speedField = l;
+        expect(speedField != nullptr, "numeric entry missing");
+        speedField->showEditor();
+        expect(speedField->getCurrentTextEditor() != nullptr, "numeric entry will not open");
+        speedField->getCurrentTextEditor()->setText("32.5");
+        speedField->hideEditor(false); settle();
         control<juce::Slider>(*e, "tolerance").setValue(6.5, juce::sendNotificationSync); settle();
         expect(p.settings().speedMs == 32.5f && p.settings().toleranceCents == 6.5f, "retune/freedom knobs did not reach parameters");
         layout(*e);
         render(*e, out.getChildFile("Design/Manual.png"));
-        click(*e, "midi");
+        select(*e, "mode", 5);
         expect(p.parameters.getRawParameterValue("midi")->load() > 0.5f, "MIDI toggle did not reach parameter");
         b.clear(); p.processBlock(b, m); settle();
-        expect(!component(*e, "note0").isEnabled() && !component(*e, "mode0").isEnabled(), "MIDI left manual target editable");
+        expect(!component(*e, "root").isVisible() && component(*e, "mode").isEnabled() && control<juce::ComboBox>(*e, "mode").getSelectedId() == 5, "MIDI source selector is not usable");
         expect(control<juce::Label>(*e, "status").getText().contains("MIDI"), "MIDI source hidden in compact editor");
-        render(*e, out.getChildFile("Design/MIDI.png"));
+        layout(*e); render(*e, out.getChildFile("Design/MIDI.png"));
+        m.addEvent(juce::MidiMessage::noteOn(1, 69, static_cast<juce::uint8>(100)), 0);
+        p.processBlock(b, m); m.clear(); settle();
+        expect(control<juce::Label>(*e, "summary").getText().contains("A"), "MIDI note readout missing");
+        render(*e, out.getChildFile("Design/MIDI-active.png"));
         juce::MemoryBlock state; p.getStateInformation(state);
         e.reset(); p.setStateInformation(state.getData(), static_cast<int>(state.getSize()));
         e.reset(p.createEditor()); e->setVisible(true); settle();
-        expect(e->getHeight() == 624 && control<juce::Button>(*e, "midi").getToggleState(), "restored MIDI state not discoverable");
-        click(*e, "midi"); settle();
+        expect(e->getHeight() == 552 && control<juce::ComboBox>(*e, "mode").getSelectedId() == 5, "restored MIDI state not discoverable");
+        select(*e, "mode", 2);
+        expect(p.parameters.getRawParameterValue("midi")->load() < 0.5f && p.settings().chord == 4, "leaving MIDI lost manual target");
         p.setParameter("chord", 9); settle();
-        expect(control<juce::Button>(*e, "mode3").getToggleState(), "legacy chromatic state not represented");
+        expect(control<juce::ComboBox>(*e, "mode").getSelectedId() == 4, "legacy chromatic state not represented");
         render(*e, out.getChildFile("Design/Chromatic.png"));
         click(*e, "note0");
         expect(p.settings().chord == 10 && notefollow::noteMask(p.settings()) == 4094u, "legacy chromatic editing failed");
@@ -180,7 +208,7 @@ int main(int argc, char** argv) {
         p.reset(); expect(p.detected.load() < 0 && p.destination.load() < 0 && p.cents.load() == 0 && p.certainty.load() == 0, "reset left stale meters");
         std::cout << "PASS: direct note/chord selection, custom continuity, empty state, presets, strength, three visible rotary controls, MIDI visibility, legacy state, host automation\n";
         std::cout << "PASS: scales, natural voice, new parameter state, sustain/channel isolation/duplicate notes/panic, reset meters\n";
-        std::cout << "PASS: real native editor renders 720 x 624; nine state screenshots\n";
+        std::cout << "PASS: real native editor renders 720 x 552; eleven state screenshots; consistent source/preset pickers, numeric typing and non-overlapping controls\n";
         return 0;
     } catch (const std::exception& x) { std::cerr << "FAIL: " << x.what() << '\n'; return 1; }
 }

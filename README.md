@@ -12,8 +12,8 @@ An open-source monophonic vocal pitch-correction effect for **Windows x64 / VST3
 
 Get the Windows build from [Releases](https://github.com/alexeyPetrushin/NoteShaper/releases/latest).
 
-- **NoteShaper-0.5-vst3.zip**: ready-to-use VST3 bundle and guides.
-- **NoteShaper-0.5-full.zip**: VST3, standalone application, source, tests and the JUCE source archive.
+- **NoteShaper-0.5.1-vst3.zip**: ready-to-use VST3 bundle and guides.
+- **NoteShaper-0.5.1-full.zip**: VST3, standalone application, source, tests and the JUCE source archive.
 
 Extract the archive, close your DAW, and copy the entire `VST3/NoteShaper.vst3` folder to `C:\Program Files\Common Files\VST3`. Rescan VST3 plug-ins in Ableton Live. Do not copy only the DLL inside the bundle. See the [installation guide](docs/USER_GUIDE.en.md#installation) for upgrading from NoteFollow.
 

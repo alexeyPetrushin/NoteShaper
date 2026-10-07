@@ -51,7 +51,7 @@ int main(int argc, char** argv) {
         std::unique_ptr<juce::AudioProcessorEditor> editor(plugin->createEditor());
         expect(editor != nullptr, "editor failed");
         editor->setVisible(true);
-        expect(editor->getWidth() == 720 && editor->getHeight() == 624, "editor has wrong dimensions");
+        expect(editor->getWidth() == 720 && editor->getHeight() == 552, "editor has wrong dimensions");
         editor.reset();
         // MIDI note-off and no held-note state must return delayed dry audio.
         plugin->reset(); set(*plugin, "Follow MIDI notes", 1);
@@ -112,7 +112,7 @@ int main(int argc, char** argv) {
             }
             oldPlugin->releaseResources();
             std::cout << "PASS: state from legacy " << oldDescriptions[0]->version
-                      << " binary restores all 18 parameters in NoteShaper 0.5, same VST3 identity; new settings default off\n";
+                      << " binary restores all 18 parameters in NoteShaper 0.5.1, same VST3 identity; new settings default off\n";
         }
         std::cout << "PASS: VST3 scan/load, stereo, state restore, native editor creation, MIDI note-off, latency\n";
         return 0;

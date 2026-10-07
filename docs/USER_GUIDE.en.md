@@ -1,4 +1,4 @@
-# NoteShaper 0.5 — user guide
+# NoteShaper 0.5.1 — user guide
 
 [Русский](USER_GUIDE.ru.md) · [Home](../README.md)
 
@@ -32,15 +32,15 @@ The interface is currently Russian. These are the main controls:
 
 ## Choosing targets
 
-**Note:** choose a pitch class in the large note picker. The nearest octave to the voice is chosen automatically.
+**Note:** choose a pitch class in the note picker on the right. The nearest octave to the voice is chosen automatically.
 
-**Chord:** choose its root in the large note picker and select a chord type. Chords constrain the allowed notes of one voice; they do not generate extra voices.
+**Chord:** choose its root in the note picker on the right and select a chord type. Chords constrain the allowed notes of one voice; they do not generate extra voices.
 
 **Scale:** select the song's scale type and tonic. Available scales are major, natural minor, harmonic minor, major pentatonic and minor pentatonic.
 
 **Custom:** click notes to include or exclude them. Switching to Custom retains the current chord or scale. An empty set keeps the original pitch.
 
-The top area contains the mode and note/chord/scale pickers. Individual note buttons appear only in Custom. “Вести к” lists all allowed pitch classes. For a vocal melody, a song scale is often more appropriate than a chord: a major triad has three notes, while a major scale has seven. NoteShaper corrects toward the nearest allowed note.
+In the top “Ноты” (Targets) area, use the first dropdown to choose Note, Chord, Scale, Custom or MIDI, then choose the note and chord/scale type on the right. Below, “Коррекция” (Correction) contains a preset dropdown and the three knobs. You can adjust the knobs directly without choosing a preset. Individual note buttons appear only in Custom. “Вести к” lists allowed pitch classes; Custom shows them through selected note buttons. For a vocal melody, a song scale is often more appropriate than a chord: a major triad has three notes, while a major scale has seven. NoteShaper corrects toward the nearest allowed note.
 
 ## The three controls
 
@@ -60,7 +60,7 @@ Drag a rotary control vertically or click its numeric value to type a number.
 | Tight | 90% | 14 ms | 2 cents | Off |
 | Rap | 100% | 0 ms | 0 | Off |
 
-Presets retain your target notes. Changing any preset-controlled setting manually removes the preset highlight.
+Use the dropdown beside “Коррекция” to choose a preset. Presets retain your target notes. Changing any preset-controlled setting manually changes the displayed preset to “Вручную” (Manual).
 
 For obvious hard tuning, select Rap. Use Note to deliberately constrain the voice to one pitch class, or the song's Scale for a stepped melody. For subtle correction, start with Gentle and adjust strength and time by ear.
 
@@ -70,7 +70,7 @@ For obvious hard tuning, select Rap. Use Note to deliberately constrain the voic
 
 1. Create a separate MIDI track with a clip or keyboard input.
 2. Route **MIDI To** to the audio track containing NoteShaper; choose the plug-in in the lower destination selector.
-3. Enable the **MIDI** switch at the top right.
+3. Choose **MIDI** in the first dropdown under “Ноты”. To return to manual targets, select Note, Chord, Scale or Custom in that same dropdown.
 
 Incoming notes define allowed pitch classes, not exact vocal octaves. A MIDI chord supplies several possible targets for one voice. Sustain (CC64) holds released notes until pedal release, independently on each MIDI channel.
 

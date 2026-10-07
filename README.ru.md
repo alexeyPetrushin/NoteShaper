@@ -12,8 +12,8 @@
 
 Готовая версия находится в [Releases](https://github.com/alexeyPetrushin/NoteShaper/releases/latest).
 
-- **NoteShaper-0.5-vst3.zip** — плагин VST3 и инструкции.
-- **NoteShaper-0.5-full.zip** — VST3, отдельное приложение, исходники, проверки и архив исходников JUCE.
+- **NoteShaper-0.5.1-vst3.zip** — плагин VST3 и инструкции.
+- **NoteShaper-0.5.1-full.zip** — VST3, отдельное приложение, исходники, проверки и архив исходников JUCE.
 
 Распакуй архив и закрой Ableton. Скопируй **всю папку** `VST3/NoteShaper.vst3` в `C:\Program Files\Common Files\VST3`, затем пересканируй VST3 в Ableton. Копирования одного файла DLL недостаточно. При обновлении с NoteFollow используй [инструкцию](docs/USER_GUIDE.ru.md#установка).
 
