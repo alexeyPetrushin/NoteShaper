@@ -1,5 +1,15 @@
 # Changelog / Изменения
 
+## 0.5.2 — 2026-10-08
+
+- The mode dropdown replaces the Targets heading; the chord/scale type dropdown is aligned on the right.
+- Twelve note keys stay visible in every mode. Chord keys transpose the complete chord in one click while retaining its type.
+- Note selects one target, Scale changes the tonic, Custom toggles notes, and MIDI shows incoming notes read-only.
+- Root and allowed chord/scale notes have distinct indicators. Removed the separate root dropdown.
+- Retained the three direct presets, three knobs, quiet language button and saved parameter identity.
+
+Вместо надписи Targets — выбор режима. Справа — тип аккорда или гаммы, ниже — постоянные клавиши C, C#, D и далее. В Chord нажатие переносит весь аккорд с сохранением типа. Основная нота выделена тёмным, другие допустимые ноты отмечены тонкой чертой. MIDI показывает поступающие ноты без ручного изменения.
+
 ## 0.5.1 — 2026-10-08
 
 - One target-source dropdown includes Note, Chord, Scale, Custom and MIDI.

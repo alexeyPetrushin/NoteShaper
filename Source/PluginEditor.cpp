@@ -62,12 +62,17 @@ void NoteShaperSkin::drawButtonBackground(juce::Graphics& g, juce::Button& b,
             g.setColour(panel); g.strokePath(mark, juce::PathStrokeType(1.8f));
         }
     } else {
-        auto fill = selected ? accent : panel;
+        const bool noteKey = id.startsWith("note");
+        auto fill = selected ? accent : (noteKey && static_cast<bool>(b.getProperties()["accidental"]) ? rail : panel);
         if (hover || down) fill = selected ? fill.brighter(0.1f) : rail;
         g.setColour(fill.withMultipliedAlpha(b.isEnabled() ? 1.0f : 0.4f));
         g.fillRoundedRectangle(bounds, corner);
         g.setColour(selected ? accent : controlLine.withAlpha(0.6f));
         g.drawRoundedRectangle(bounds, corner, 0.8f);
+        if (noteKey && !selected && static_cast<bool>(b.getProperties()["targetMember"])) {
+            g.setColour(controlLine.withAlpha(b.isEnabled() ? 1.0f : 0.4f));
+            g.fillRoundedRectangle(bounds.getCentreX() - 7, bounds.getBottom() - 7, 14, 2, 1);
+        }
     }
     if (b.hasKeyboardFocus(true)) {
         g.setColour(accent); g.drawRoundedRectangle(bounds.reduced(1), corner, 2);
@@ -165,10 +170,6 @@ NoteShaperEditor::NoteShaperEditor(NoteShaperProcessor& p) : AudioProcessorEdito
     addAndMakeVisible(mode); identify(mode, "mode", tr(u8"Способ выбора нот"), 1);
     mode.setTooltip(tr(u8"Нота, аккорд, гамма, свой набор или ноты из MIDI. Сначала выбери способ, затем ноты справа."));
     mode.onChange = [this] { if (mode.getSelectedId() > 0) chooseMode(mode.getSelectedId() - 1); };
-    for (int i = 0; i < names.size(); ++i) root.addItem(names[i], i + 1);
-    addAndMakeVisible(root); identify(root, "root", tr(u8"Основная нота"), 2);
-    root.setTooltip(tr(u8"Выберите основную ноту. Октава подбирается рядом с голосом."));
-    root.onChange = [this] { if (root.getSelectedId() > 0) chooseNote(root.getSelectedId() - 1); };
     addAndMakeVisible(chord); identify(chord, "chord", juce::String::fromUTF8(u8"Тип аккорда"), 3);
     chord.setTooltip(juce::String::fromUTF8(u8"Аккорд задаёт допустимые ноты для одного голоса."));
     chord.onChange = [this] {
@@ -190,6 +191,7 @@ NoteShaperEditor::NoteShaperEditor(NoteShaperProcessor& p) : AudioProcessorEdito
     for (int i = 0; i < 12; ++i) {
         keys[i].setButtonText(names[i]); addAndMakeVisible(keys[i]);
         identify(keys[i], "note" + juce::String(i), names[i], i + 7);
+        keys[i].getProperties().set("accidental", names[i].containsChar('#'));
         keys[i].onClick = [this, i] { chooseNote(i); };
     }
     for (int i = 0; i < 3; ++i) {
@@ -270,9 +272,7 @@ void NoteShaperEditor::updateLanguage() {
     populate(scale, {t("Major", u8"Мажор"), t("Minor", u8"Минор"), t("Harmonic minor", u8"Гармонич. минор"),
                     t("Major pentatonic", u8"Мажорная пентатоника"), t("Minor pentatonic", u8"Минорная пентатоника")}, 1);
     mode.setTitle(t("Target source", u8"Способ выбора нот"));
-    mode.setTooltip(t("Choose Note, Chord, Scale, Custom or MIDI, then the notes on the right.", u8"Выбери ноту, аккорд, гамму, свой набор или MIDI, затем ноты справа."));
-    root.setTitle(t("Root or target note", u8"Основная или целевая нота"));
-    root.setTooltip(t("Choose a note. The octave nearest to the voice is selected automatically.", u8"Выбери ноту. Октава подбирается рядом с голосом."));
+    mode.setTooltip(t("Choose Note, Chord, Scale, Custom or MIDI. Use the keys below to select notes or a root.", u8"Выбери ноту, аккорд, гамму, свой набор или MIDI. Клавиши ниже выбирают ноты или основной тон."));
     chord.setTitle(t("Chord type", u8"Тип аккорда"));
     chord.setTooltip(t("Allowed chord notes for one voice, without adding harmonies.", u8"Допустимые ноты аккорда для одного голоса, без создания дополнительных голосов."));
     scale.setTitle(t("Scale type", u8"Тип гаммы"));
@@ -340,8 +340,6 @@ void NoteShaperEditor::refresh() {
     const int targetMode = s.scale > 0 ? 2 : s.chord == 0 ? 0 : s.chord < 9 ? 1 : 3;
     const auto mask = targetMask();
     mode.setSelectedId(byMidi ? 5 : targetMode + 1, juce::dontSendNotification);
-    root.setVisible(targetMode != 3 && !byMidi); root.setEnabled(!byMidi);
-    root.setSelectedId(s.root + 1, juce::dontSendNotification);
     chord.setVisible(targetMode == 1 && !byMidi); chord.setEnabled(!byMidi);
     scale.setVisible(targetMode == 2 && !byMidi); scale.setEnabled(!byMidi);
     if (targetMode == 1) {
@@ -353,16 +351,18 @@ void NoteShaperEditor::refresh() {
         const bool included = (mask & (1u << i)) != 0;
         keys[i].setToggleState(byMidi || targetMode == 3 ? included : i == s.root, juce::dontSendNotification);
         keys[i].setEnabled(!byMidi);
-        keys[i].setVisible(targetMode == 3 && !byMidi);
-        keys[i].setTooltip(translated("Include or exclude ", u8"Включить или исключить ") + names[i]);
+        keys[i].getProperties().set("targetMember", included);
+        const auto action = byMidi ? translated("MIDI note: ", u8"Нота MIDI: ") : targetMode == 3
+            ? translated("Include or exclude ", u8"Включить или исключить ") : targetMode == 1
+            ? translated("Move the chord to ", u8"Перенести аккорд в ") : targetMode == 2
+            ? translated("Set scale tonic to ", u8"Выбрать тонику гаммы ") : translated("Tune to ", u8"Вести голос к ");
+        keys[i].setTitle(action + names[i]); keys[i].setTooltip(action + names[i]);
         if (included) allowed.add(names[i]);
     }
     noteCaption.setVisible(byMidi || targetMode == 3 || targetMode == 0);
-    noteCaption.setBounds(targetMode == 0 && !byMidi ? 344 : 224, 112, targetMode == 0 && !byMidi ? 344 : 464, 44);
     noteCaption.setText(byMidi ? translated("Route MIDI to this track", u8"Направь MIDI на эту дорожку") : targetMode == 3
                         ? (mask == 0 ? translated("No notes — original pitch", u8"Нет нот — исходная высота") : translated("Select notes below", u8"Выбери ноты ниже"))
                         : translated("Nearest vocal octave", u8"Октава подбирается к голосу"), juce::dontSendNotification);
-    summary.setVisible(byMidi || targetMode != 3);
     summary.setText(mask == 0 ? translated("No notes selected — original pitch", u8"Нет выбранных нот — исходная высота")
                     : translated("Targets: ", u8"Вести к: ") + allowed.joinIntoString(juce::String::fromUTF8("  ·  ")), juce::dontSendNotification);
     summary.setColour(juce::Label::textColourId, mask == 0 ? text : muted);
@@ -386,7 +386,6 @@ void NoteShaperEditor::paint(juce::Graphics& g) {
     g.fillAll(background);
     label(g, "NoteShaper", {32, 24, 260, 24}, valueSize, text);
     g.setFont(uiFont(bodySize, juce::Font::bold)); g.setColour(text);
-    g.drawText(translated("Targets", u8"Ноты"), juce::Rectangle<int>(32, 80, 280, 24), juce::Justification::left);
     g.drawText(translated("Correction", u8"Коррекция"), juce::Rectangle<int>(32, 248, 280, 24), juce::Justification::left);
     label(g, translated("Strength", u8"Сила"), {48, 296, 176, 24}, bodySize, text, juce::Justification::centred);
     label(g, translated("Retune", u8"Время"), {272, 296, 176, 24}, bodySize, text, juce::Justification::centred);
@@ -396,11 +395,11 @@ void NoteShaperEditor::paint(juce::Graphics& g) {
 }
 void NoteShaperEditor::resized() {
     status.setBounds(384, 498, 304, 24);
-    mode.setBounds(32, 112, 176, 44);
-    root.setBounds(224, 112, 104, 44);
-    chord.setBounds(344, 112, 344, 44); scale.setBounds(344, 112, 344, 44);
-    for (int i = 0; i < 12; ++i) keys[i].setBounds(32 + i * 55, 164, 51, 44);
-    summary.setBounds(32, 176, 656, 24);
+    mode.setBounds(32, 80, 176, 44);
+    chord.setBounds(384, 80, 304, 44); scale.setBounds(384, 80, 304, 44);
+    noteCaption.setBounds(384, 80, 304, 44);
+    for (int i = 0; i < 12; ++i) keys[i].setBounds(32 + i * 55, 140, 51, 52);
+    summary.setBounds(32, 200, 656, 20);
     natural.setBounds(32, 488, 280, 44);
     for (int i = 0; i < 3; ++i) presets[i].setBounds(384 + i * 104, 240, 96, 44);
     language.setBounds(632, 16, 56, 44);

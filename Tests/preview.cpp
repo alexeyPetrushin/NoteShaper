@@ -32,9 +32,9 @@ void select(juce::AudioProcessorEditor& e, const juce::String& id, int choice) {
     picker.setSelectedId(choice, juce::sendNotificationSync); settle();
 }
 void selectRoot(juce::AudioProcessorEditor& e, int note) {
-    auto& root = control<juce::ComboBox>(e, "root");
-    expect(root.isVisible() && root.isEnabled(), "root picker unavailable");
-    root.setSelectedId(note + 1, juce::sendNotificationSync); settle();
+    auto& key = control<juce::Button>(e, "note" + juce::String(note));
+    expect(key.isVisible() && key.isEnabled(), "note key unavailable");
+    key.triggerClick(); settle();
 }
 void render(juce::AudioProcessorEditor& editor, const juce::File& path) {
     // Settle audio and button feedback before taking a public state snapshot.
@@ -88,8 +88,10 @@ int main(int argc, char** argv) {
         int visibleControls = 0;
         for (auto* c : e->getChildren()) if (c->isVisible() &&
             (dynamic_cast<juce::Button*>(c) || dynamic_cast<juce::Slider*>(c) || dynamic_cast<juce::ComboBox*>(c))) ++visibleControls;
-        expect(visibleControls == 11, "chord mode has redundant controls");
-        expect(component(*e, "root").isVisible() && !component(*e, "note0").isVisible(), "normal mode shows competing root controls");
+        expect(visibleControls == 22, "chord mode must have twelve keys and one type picker");
+        expect(component(*e, "mode").getY() == component(*e, "chord").getY(), "mode and type must share a header row");
+        for (int i = 0; i < 12; ++i)
+            expect(component(*e, "note" + juce::String(i)).isVisible(), "keyboard missing in chord mode");
         expect(control<juce::Button>(*e, "preset2").getToggleState(), "hard preset state wrong");
         expect(component(*e, "speed").isVisible() && component(*e, "tolerance").isVisible(), "three controls not visible");
         for (const auto& id : {"amount", "speed", "tolerance"})
@@ -118,11 +120,25 @@ int main(int argc, char** argv) {
         selectRoot(*e, 0);
         expect(p.settings().root == 0 && p.settings().chord == 2, "chord root selection edited note set");
         expect(notefollow::noteMask(p.settings()) == ((1u << 0) | (1u << 3) | (1u << 7)), "wrong C minor targets");
+        for (int n = 0; n < 12; ++n) {
+            selectRoot(*e, n);
+            const unsigned expected = (1u << n) | (1u << ((n + 3) % 12)) | (1u << ((n + 7) % 12));
+            expect(p.settings().chord == 2 && notefollow::noteMask(p.settings()) == expected,
+                   "keyboard must transpose the complete minor chord, preserving type");
+            for (int k = 0; k < 12; ++k) {
+                auto& key = control<juce::Button>(*e, "note" + juce::String(k));
+                expect(key.getToggleState() == (k == n), "chord root highlight is ambiguous");
+                expect(static_cast<bool>(key.getProperties()["targetMember"]) == ((expected & (1u << k)) != 0),
+                       "chord target indicators differ from audio targets");
+            }
+            selectRoot(*e, n);
+            expect(notefollow::noteMask(p.settings()) == expected, "repeated chord root click toggled a target");
+        }
         select(*e, "mode", 1); selectRoot(*e, 9);
         expect(p.settings().chord == 0 && notefollow::noteMask(p.settings()) == (1u << 9), "single A picker selection failed");
         render(*e, out.getChildFile("Design/Single.png"));
         select(*e, "mode", 4);
-        expect(!component(*e, "root").isVisible() && component(*e, "note0").isVisible(), "custom disclosure failed");
+        expect(component(*e, "note0").isVisible() && !component(*e, "chord").isVisible(), "custom keyboard or disclosure failed");
         expect(p.settings().chord == 10 && notefollow::noteMask(p.settings()) == (1u << 9), "custom mode lost current target");
         click(*e, "note0"); click(*e, "note9");
         expect(notefollow::noteMask(p.settings()) == 1u, "custom set edits failed");
@@ -179,12 +195,15 @@ int main(int argc, char** argv) {
         select(*e, "mode", 5);
         expect(p.parameters.getRawParameterValue("midi")->load() > 0.5f, "MIDI toggle did not reach parameter");
         b.clear(); p.processBlock(b, m); settle();
-        expect(!component(*e, "root").isVisible() && component(*e, "mode").isEnabled() && control<juce::ComboBox>(*e, "mode").getSelectedId() == 5, "MIDI source selector is not usable");
+        expect(component(*e, "note0").isVisible() && !component(*e, "note0").isEnabled() && component(*e, "mode").isEnabled() && control<juce::ComboBox>(*e, "mode").getSelectedId() == 5, "MIDI keyboard must remain visible and read-only");
         expect(control<juce::Label>(*e, "status").getText().contains("MIDI"), "MIDI source hidden in compact editor");
         layout(*e); render(*e, out.getChildFile("Design/MIDI.png"));
         m.addEvent(juce::MidiMessage::noteOn(1, 69, static_cast<juce::uint8>(100)), 0);
         p.processBlock(b, m); m.clear(); settle();
         expect(control<juce::Label>(*e, "summary").getText().contains("A"), "MIDI note readout missing");
+        expect(control<juce::Button>(*e, "note9").getToggleState(), "incoming MIDI note missing from keyboard");
+        click(*e, "note0");
+        expect(p.activeNotes.load() == (1u << 9), "MIDI keyboard changed incoming notes");
         render(*e, out.getChildFile("Design/MIDI-active.png"));
         juce::MemoryBlock state; p.getStateInformation(state);
         e.reset(); p.setStateInformation(state.getData(), static_cast<int>(state.getSize()));
@@ -198,7 +217,7 @@ int main(int argc, char** argv) {
         click(*e, "note0");
         expect(p.settings().chord == 10 && notefollow::noteMask(p.settings()) == 4094u, "legacy chromatic editing failed");
         p.setParameter("root", 7); p.setParameter("chord", 1); p.setParameter("amount", 27); settle();
-        expect(control<juce::ComboBox>(*e, "root").getSelectedId() == 8, "host root automation not reflected");
+        expect(control<juce::Button>(*e, "note7").getToggleState(), "host root automation not reflected in keyboard");
         expect(control<juce::Slider>(*e, "amount").getValue() == 27, "host strength automation not reflected");
         p.setParameter("scale", 3); p.setParameter("natural", 1); settle();
         p.getStateInformation(state); p.setParameter("scale", 0); p.setParameter("natural", 0);
@@ -227,7 +246,7 @@ int main(int argc, char** argv) {
         event(juce::MidiMessage::noteOff(1, 69));
         expect(event(juce::MidiMessage::controllerEvent(1, 121, 0)) == 0, "reset-controllers left sustained notes");
         p.reset(); expect(p.detected.load() < 0 && p.destination.load() < 0 && p.cents.load() == 0 && p.certainty.load() == 0, "reset left stale meters");
-        std::cout << "PASS: direct note/chord selection, custom continuity, empty state, presets, strength, three visible rotary controls, MIDI visibility, legacy state, host automation\n";
+        std::cout << "PASS: twelve permanent note keys, one-click chord transposition through all roots, type retention, root/target indicators, custom continuity, empty state, presets, strength, three knobs, MIDI read-only keyboard, legacy state, host automation\n";
         std::cout << "PASS: scales, natural voice, new parameter state, sustain/channel isolation/duplicate notes/panic, reset meters\n";
         std::cout << "PASS: real native editor renders 720 x 552; twelve state screenshots; English default, RU/EN switch and saved language, direct preset buttons, numeric typing and non-overlapping controls\n";
         return 0;

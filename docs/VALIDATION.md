@@ -2,11 +2,11 @@
 
 ## English
 
-Release 0.5.1 was built for Windows x64. The packaged VST3 was scanned and loaded in a JUCE host, and the native editor was rendered in twelve states at 720 × 552.
+Release 0.5.2 was built for Windows x64. The packaged VST3 was scanned and loaded in a JUCE host, and the native editor was rendered in twelve states at 720 × 552.
 
-The UI check additionally verifies non-overlapping controls, direct numeric typing, unified target selection, direct preset buttons, English default, full RU/EN switching and saved language and exiting MIDI without losing the remembered chord. It covers target selection, scales, scale-to-custom continuity, three visible knobs, numeric values, presets, Natural Voice, MIDI waiting, parameter automation and state restoration. Native processor checks also cover sustain, independent MIDI channels, repeated notes, All Notes Off, All Sound Off, Reset Controllers and meter reset.
+The UI check additionally verifies non-overlapping controls, direct numeric typing, twelve permanently visible note keys, full minor-chord transposition through every root, retained chord type, root/target indicators, read-only incoming MIDI display, direct preset buttons, English default, full RU/EN switching and saved language and exiting MIDI without losing the remembered chord. It covers target selection, scales, scale-to-custom continuity, three visible knobs, numeric values, presets, Natural Voice, MIDI waiting, parameter automation and state restoration. Native processor checks also cover sustain, independent MIDI channels, repeated notes, All Notes Off, All Sound Off, Reset Controllers and meter reset.
 
-The 0.5.1 host check used a retained NoteFollow 0.3 binary to confirm the same VST3 identity and restoration of all 18 legacy parameters. The original 0.1 binary had passed this check for release 0.4; processor/DSP source is unchanged in 0.5. New scale/natural settings reset to off when absent from an old state.
+The 0.5.2 host check used a retained NoteFollow 0.3 binary to confirm the same VST3 identity and restoration of all 18 legacy parameters. The original 0.1 binary had passed this check for release 0.4; processor/DSP source is unchanged in 0.5. New scale/natural settings reset to off when absent from an old state.
 
 DSP source is unchanged from 0.4. Its regression results are retained: 24 settled pitch cases at 44.1/48/96/192 kHz had maximum error below 0.22 cents on synthetic harmonic signals. The checks also cover exact delayed dry output at 0%/empty targets, partial pitch correction, chords/scales, noise/silence, block-size independence, retune onset/re-attack, deliberate melody changes and opposite-polarity stereo.
 
@@ -16,9 +16,9 @@ The fixed reported delay is 3072 samples at 48 kHz, or 64 ms. These are syntheti
 
 ## Русский
 
-Сборка 0.5.1 проверена в VST3-хосте. Реальный нативный интерфейс отрисован в двенадцати состояниях при 720 × 552: выбор целей, гаммы, переход в свой набор, три крутилки, значения, пресеты, «Сохранить вибрато», MIDI, автоматизация и сохранение состояния.
+Сборка 0.5.2 проверена в VST3-хосте. Реальный нативный интерфейс отрисован в двенадцати состояниях при 720 × 552: выбор целей, гаммы, переход в свой набор, три крутилки, значения, пресеты, «Сохранить вибрато», MIDI, автоматизация и сохранение состояния.
 
-Также проверены английский по умолчанию, полный перевод EN/RU и сохранение языка, отдельные кнопки пресетов, отсутствие перекрытия элементов, ввод числа с клавиатуры и выход из MIDI без потери прежнего аккорда. Проверены педаль sustain, независимые каналы, повторные ноты, отпускание, аварийное снятие нот и сброс показаний. Версия 0.5.1 загрузила прежние 18 параметров из сохранённого NoteFollow 0.3; исходная 0.1 прошла эту проверку для релиза 0.4, а код процессора в 0.5 не изменён. Отсутствующие новые параметры выключаются.
+Также проверены перенос целого минорного аккорда по всем 12 клавишам, сохранение типа, выделение основного тона и прочих целей, видимая клавиатура MIDI без ручного ввода, английский по умолчанию, полный перевод EN/RU и сохранение языка, отдельные кнопки пресетов, отсутствие перекрытия элементов, ввод числа с клавиатуры и выход из MIDI без потери прежнего аккорда. Проверены педаль sustain, независимые каналы, повторные ноты, отпускание, аварийное снятие нот и сброс показаний. Версия 0.5.2 загрузила прежние 18 параметров из сохранённого NoteFollow 0.3; исходная 0.1 прошла эту проверку для релиза 0.4, а код процессора в 0.5 не изменён. Отсутствующие новые параметры выключаются.
 
 Движок версии 0.4 не изменён. На 24 синтетических гармонических сигналах при 44.1/48/96/192 кГц установившаяся ошибка была меньше 0,22 цента. Также проверены исходный сигнал при 0% и пустом наборе, частичная правка, гаммы/аккорды, шум/тишина, размеры блоков, начало фраз, смена мелодии и противоположная полярность стерео.
 

@@ -2,32 +2,31 @@
 
 ## Flow / Сценарий
 
-The primary task is to choose the pitches a voice should follow, then adjust correction. Version 0.5.1 uses one top-to-bottom flow in a 720 × 552 editor:
+The primary action is to choose the pitches a voice should follow, then adjust correction. Version 0.5.2 keeps the 720 × 552 editor and a fixed keyboard:
 
-1. **Targets:** the first dropdown selects Note, Chord, Scale, Custom or MIDI. Relevant note/type choices follow on the same row. Only Custom reveals twelve note buttons below.
-2. **Correction:** Gentle, Tight and Rap are three directly visible buttons. No dropdown or group wrapper surrounds them. Choose one in a single click or adjust the three knobs immediately. Presets retain target notes; manual changes clear selection.
-3. **Listen:** Preserve vibrato and the detected → target/cents readout sit in the footer.
+1. The mode dropdown replaces the static Targets heading at the top left: Note, Chord, Scale, Custom or MIDI.
+2. The relevant chord/scale type dropdown sits at the top right, aligned with the correction presets below. Minor, Major and other types are one level deep.
+3. Twelve C–B note keys stay in the same place. Note selects one target; Chord transposes the complete chord and retains its type; Scale changes tonic; Custom toggles targets. MIDI displays incoming notes with manual selection disabled.
+4. Gentle, Tight and Rap remain direct buttons beside Correction. Three knobs are always available; manual changes clear preset selection without changing notes.
 
-Ноты сверху, коррекция ниже. MIDI находится среди способов выбора нот. «Мягко», «Плотно» и «Рэп» доступны одним нажатием, три крутилки доступны сразу. Вложенных экранов настроек и подтверждений нет.
+Вместо Targets — список режимов слева. Справа — Minor/Major или тип гаммы, ниже — клавиши. В Chord одна клавиша переносит весь аккорд; повторное нажатие не выключает его. В Custom те же клавиши включают и выключают отдельные ноты. Дополнительного списка основной ноты нет.
+
+## Selection / Выбор
+
+A dark key is the selected root in Note, Chord and Scale. Other allowed chord/scale members have a thin neutral mark, avoiding several competing root selections. In Custom all included notes are dark. The summary lists the actual pitch classes; empty targets explain that original pitch is retained. MIDI uses the same stationary keys as a read-only incoming-note display.
+
+Основной тон выделен тёмным. Тонкая черта обозначает остальные ноты аккорда/гаммы. В своём наборе выделены все включённые ноты. Пустой набор и ожидание MIDI имеют пояснения.
 
 ## Language / Язык
 
-New instances open in English. One quiet text button replaces the old subtitle at the top right. It shows EN in English and RU in Russian: 14 px muted text, no resting border or fill. Its 56 × 44 px click area is retained; hover gives subtle feedback and keyboard focus remains visible. One click translates labels, menus, units, tooltips and accessible control titles. The choice is retained on reopening and in the saved project through UI metadata; no host/audio parameter is added. Legacy states without this metadata open in English.
+English is the default. One quiet EN button changes to RU after a click, and back to EN on the next click. Muted 14 px text has no resting border or fill; the 56 × 44 px click area, hover feedback and visible keyboard focus remain. Labels, menus, units, tooltips and accessible titles are translated. Language is saved as UI metadata with the project, without adding a host/audio parameter.
 
-Английский по умолчанию, кнопка EN включает русский и меняется на RU; повторное нажатие возвращает английский. Выбор сохраняется в проекте; звуковые настройки и идентификаторы параметров не меняются.
+## Geometry / Геометрия
 
-## Consistency / Единообразие
+Segoe UI with 14 px support text, 18 px controls and 20 px name/values. Mode and type: y=80, height=44. Keys: y=140, height=52, twelve equal 51 px click targets, 4 px gaps. Outer margins are 32 px. Type dropdown and correction presets share x=384 and the same right edge. Sharps use a slightly darker neutral surface; root/selection treatment is consistent. Numeric values reveal editability on hover/focus.
 
-One typeface, Segoe UI. Three sizes: 14 px supporting information, 18 px controls/section labels, 20 px product name/values. Bold is reserved for section labels. Main controls are 44 px high. Outer margin 32 px, field gaps 16 px, preset gaps 8 px. White, cool grey and graphite; one border/radius treatment for dropdowns and buttons. Editable values have no permanent background; hover/focus reveals the field.
+The root changes in one click rather than opening a dropdown and choosing an item. Type changes need open + select. No nested controls, settings pages or confirmations are added. All keyboard buttons have the same context-dependent role within a mode.
 
-The chord view exposes 11 controls including language, versus 14 before. No control is nested in another button-like container. A source change takes open + select; presets and custom notes each take one click.
+## Two reviews / Две проверки
 
-Один шрифт, три размера, одинаковая высота и оформление управления. В режиме аккорда — 11 элементов вместе с языком вместо 14. Убраны контейнеры сегментов, повторные пояснения и постоянные плашки под числами.
-
-## Two audit passes / Два прохода
-
-The first pass identified competing segmented groups, a separate MIDI override, oversized fields and repeated labels. The final layout consolidates target selection and standardises control geometry while keeping all three presets directly visible.
-
-The second pass inspected twelve native states in the final flow, including English/Russian, all target modes, empty sets, manual settings and MIDI. Initial control text was too small and increased to 18 px. Long labels fit, selection is visible, and the correction area remains stationary when modes change. Native checks verify language restoration, unchanged tuning settings during translation, direct presets, numeric entry, target continuity and non-overlapping controls.
-
-Это экспертный аудит и проверки кода, не пользовательское исследование. See [validation](VALIDATION.md) for build checks and limits.
+Pass 1 checked the primary action, click counts, root/type distinction and the MIDI exception. Pass 2 checked actual native renders and interactions: persistent key positions, all twelve minor-chord roots, repeat clicks, mode continuity, presets, language/state restore, automation, numeric entry and non-overlapping controls. This is an expert/code review, not a user study.

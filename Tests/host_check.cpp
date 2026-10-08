@@ -112,7 +112,8 @@ int main(int argc, char** argv) {
             }
             oldPlugin->releaseResources();
             std::cout << "PASS: state from legacy " << oldDescriptions[0]->version
-                      << " binary restores all 18 parameters in NoteShaper 0.5.1, same VST3 identity; new settings default off\n";
+                      << " binary restores all 18 parameters in NoteShaper " << descriptions[0]->version
+                      << ", same VST3 identity; new settings default off\n";
         }
         std::cout << "PASS: VST3 scan/load, stereo, state restore, native editor creation, MIDI note-off, latency\n";
         return 0;

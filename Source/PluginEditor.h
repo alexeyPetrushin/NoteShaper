@@ -35,7 +35,7 @@ private:
     NoteShaperProcessor& processor;
     NoteShaperSkin skin;
     juce::TooltipWindow tooltips{this, 650};
-    juce::ComboBox mode, root, chord, scale;
+    juce::ComboBox mode, chord, scale;
     std::array<juce::TextButton, 3> presets;
     std::array<juce::TextButton, 12> keys;
     juce::TextButton natural, language;
