@@ -15,7 +15,13 @@ Get the Windows build from [Releases](https://github.com/alexeyPetrushin/NoteSha
 - **NoteShaper-0.5.2-vst3.zip**: ready-to-use VST3 bundle and guides.
 - **NoteShaper-0.5.2-full.zip**: VST3, standalone application, source, tests and the JUCE source archive.
 
-Extract the archive, close your DAW, and copy the entire `VST3/NoteShaper.vst3` folder to `C:\Program Files\Common Files\VST3`. Rescan VST3 plug-ins in Ableton Live. Do not copy only the DLL inside the bundle. See the [installation guide](docs/USER_GUIDE.en.md#installation) for upgrading from NoteFollow.
+Extract the archive and close your DAW. Copy the entire `VST3/NoteShaper.vst3` folder to a VST3 location supported by your host, then rescan. The shared Windows location is `%CommonProgramFiles%\VST3`; the drive and custom-folder support depend on your setup and DAW. The [installation guide](docs/USER_GUIDE.en.md#installation-on-windows) covers system/user/custom paths, Ableton Live, FL Studio and updates.
+
+## Compatibility
+
+Ready-made downloads are **Windows x64**. Ableton Live, FL Studio and other 64-bit VST3 hosts are expected to load this format; NoteShaper has been checked in a JUCE VST3 host, not in those DAWs individually. [FL Studio supports VST3](https://www.image-line.com/fl-studio-learning/fl-studio-online-manual/html/basics_externalplugins.htm).
+
+**macOS: no release build yet.** The Windows VST3/EXE files cannot run on a Mac. A separate Mac build and host validation are required; see the [build guide](docs/BUILD.en.md). Source availability is not a claim of tested Mac support.
 
 ## Features
 

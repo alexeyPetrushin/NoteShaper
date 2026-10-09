@@ -8,6 +8,10 @@
 - JUCE **7.0.12** source. The full release includes `ThirdParty/JUCE-7.0.12.zip`; the GitHub source repository links to upstream instead of storing the archive.
 - Windows x64 for the distributed VST3/standalone targets. The preview checker uses Windows APIs.
 
+## macOS status
+
+The release archives are Windows-only. The C++/JUCE source can be used as a starting point for a separate macOS VST3/standalone build, with a Mac toolchain and the appropriate Intel/Apple Silicon architecture. No macOS build, signing or host validation is included in this release. Do not enable `HOST_CHECK_SOURCE` on macOS: the native preview/check helpers used here depend on Windows APIs. The instructions below describe Windows builds, not a validated Mac build procedure.
+
 ## Visual Studio
 
 Install Visual Studio's Desktop development with C++ tools. Extract JUCE or clone its pinned release:

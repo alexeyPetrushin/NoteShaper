@@ -12,7 +12,7 @@ DSP source is unchanged from 0.4. Its regression results are retained: 24 settle
 
 For a synthetic 6 Hz vibrato with 30-cent depth, hard tuning produced 0.24-cent depth; Natural Voice produced 26.31-cent depth with -0.78-cent mean centre error. For a synthetic boundary wobble, the hard target switched 25 times and the natural target did not switch.
 
-The fixed reported delay is 3072 samples at 48 kHz, or 64 ms. These are synthetic/host checks, not a listening comparison against commercial plug-ins or a user study. Ableton itself was not operated. Full screen-reader testing and signed Windows distribution were not performed. The public CI workflow runs the pure DSP checks only.
+The fixed reported delay is 3072 samples at 48 kHz, or 64 ms. These are synthetic/host checks, not a listening comparison against commercial plug-ins or a user study. Ableton Live and FL Studio themselves were not operated; compatibility with them is expected from the Windows x64 VST3 format, not established by a host-specific test. No macOS plug-in build or Mac host test has been performed. Full screen-reader testing and signed Windows distribution were not performed. The public CI workflow runs the pure DSP checks only.
 
 ## Русский
 
@@ -24,4 +24,4 @@ The fixed reported delay is 3072 samples at 48 kHz, or 64 ms. These are syntheti
 
 Синтетическое вибрато 6 Гц / 30 центов после жёсткой правки имело глубину 0,24 цента, после «Живого голоса» — 26,31 цента со средней ошибкой центра -0,78 цента. Пограничное колебание вызвало 25 смен целей в жёстком режиме и ни одной в естественном.
 
-Задержка — 64 мс. Это проверки тестовых сигналов и хоста, не сравнение звучания с коммерческими плагинами и не исследование с пользователями. Ableton и экранный диктор отдельно не проверялись. CI в репозитории запускает только проверки движка.
+Задержка — 64 мс. Это проверки тестовых сигналов и хоста, не сравнение звучания с коммерческими плагинами и не исследование с пользователями. Ableton Live и FL Studio отдельно не проверялись: ожидаемая совместимость следует из формата Windows x64 VST3, а не из проверки в этих DAW. Mac-сборки и тестов в хостах macOS не было. Экранный диктор отдельно не проверялся. CI в репозитории запускает только проверки движка.
