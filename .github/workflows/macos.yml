@@ -18,11 +18,11 @@ permissions:
 
 concurrency:
   group: macos-${{ github.ref }}
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   build:
-    name: Build universal VST3 and standalone
+    name: Build universal VST3
     runs-on: macos-15-intel
     timeout-minutes: 35
     steps:
@@ -44,7 +44,7 @@ jobs:
             -DCMAKE_OSX_DEPLOYMENT_TARGET=11.0 \
             -DNOTESHAPER_BUILD_HOST_CHECK=ON
       - name: Build
-        run: cmake --build build-macos --target NoteShaper_VST3 NoteShaper_Standalone NoteShaperHostCheck NoteShaperDSPTest --parallel 3
+        run: cmake --build build-macos --target NoteShaper_VST3 NoteShaperHostCheck NoteShaperDSPTest --parallel 3
       - name: Package and check bundle architectures/signatures
         run: python3 Build/package_macos.py --build-dir build-macos --juce-dir "$RUNNER_TEMP/JUCE" --output-dir dist
       - name: Preserve executable permissions for runtime checks
@@ -84,12 +84,10 @@ jobs:
         run: |
           cd candidate
           shasum -a 256 -c *SHA256.txt
-          ditto -x -k NoteShaper-*-macos-universal.zip extracted
+          ditto -x -k NoteShaper-*-mac-vst3.zip extracted
           tar -xzf validation-tools.tar.gz
-          lipo extracted/NoteShaper-*-macos/VST3/NoteShaper.vst3/Contents/MacOS/NoteShaper -verify_arch x86_64 arm64
-          lipo extracted/NoteShaper-*-macos/Standalone/NoteShaper.app/Contents/MacOS/NoteShaper -verify_arch x86_64 arm64
-          codesign --verify --deep --strict extracted/NoteShaper-*-macos/VST3/NoteShaper.vst3
-          codesign --verify --deep --strict extracted/NoteShaper-*-macos/Standalone/NoteShaper.app
+          lipo extracted/NoteShaper.vst3/Contents/MacOS/NoteShaper -verify_arch x86_64 arm64
+          codesign --verify --deep --strict extracted/NoteShaper.vst3
       - name: Run DSP and native VST3 checks
         run: |
           test "$(uname -m)" = '${{ matrix.arch }}'
@@ -115,17 +113,21 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          archive="$(find dist -maxdepth 1 -name 'NoteShaper-*-macos-universal.zip')"
+          archive="$(find dist -maxdepth 1 -name 'NoteShaper-*-mac-vst3.zip')"
           filename="$(basename "$archive")"
           version="${filename#NoteShaper-}"
-          version="${version%-macos-universal.zip}"
+          version="${version%-mac-vst3.zip}"
           tag="v$version"
           gh release view "$tag" --json assets --jq '.assets[].name' > "$RUNNER_TEMP/release-assets.txt"
           if grep -Fxq "$filename" "$RUNNER_TEMP/release-assets.txt"; then
             echo "Mac release already exists; preserving the published archive. Bump the project version for a new release."
-            exit 0
+          else
+            gh release upload "$tag" "$archive"
           fi
-          gh release upload "$tag" "$archive" dist/*SHA256.txt
-          gh release view "$tag" --json body --jq .body > "$RUNNER_TEMP/release-notes.md"
-          cat Build/MAC_RELEASE_NOTES.md >> "$RUNNER_TEMP/release-notes.md"
+          python3 Build/render_release_notes.py "$version" dist/*SHA256.txt "$RUNNER_TEMP/release-notes.md"
           gh release edit "$tag" --notes-file "$RUNNER_TEMP/release-notes.md"
+          for legacy in "NoteShaper-$version-full.zip" "NoteShaper-$version-vst3.zip" "NoteShaper-$version-macos-universal.zip"; do
+            if grep -Fxq "$legacy" "$RUNNER_TEMP/release-assets.txt"; then
+              gh release delete-asset "$tag" "$legacy" --yes
+            fi
+          done
