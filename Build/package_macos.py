@@ -45,9 +45,9 @@ def main():
     shutil.copy2(source / 'LICENSE.txt', package / 'LICENSE.txt')
     source_copy = package / 'SourceCode'
     source_copy.mkdir()
-    for folder in ('Source', 'Tests', 'Build', 'ThirdParty', 'docs'):
+    for folder in ('Source', 'Tests', 'Build', 'ThirdParty', 'docs', 'assets', '.github'):
         shutil.copytree(source / folder, source_copy / folder, ignore=shutil.ignore_patterns('__pycache__', '*.zip'))
-    for name in ('CMakeLists.txt', 'LICENSE.txt', 'README.md', 'README.ru.md'):
+    for name in ('CMakeLists.txt', 'LICENSE.txt', 'README.md', 'README.ru.md', 'CHANGELOG.md'):
         shutil.copy2(source / name, source_copy / name)
     juce_archive = source_copy / 'ThirdParty/JUCE-7.0.12.zip'
     subprocess.check_call(['git', '-C', str(juce), 'archive', '--format=zip', '--prefix=JUCE-7.0.12/', '--output', str(juce_archive), 'HEAD'])
@@ -55,6 +55,7 @@ def main():
         'product': 'NoteShaper', 'version': version,
         'source_commit': run('git', '-C', str(source), 'rev-parse', 'HEAD'),
         'juce_commit': run('git', '-C', str(juce), 'rev-parse', 'HEAD'),
+        'juce_patches': ['Build/patch_juce_macos.py'],
         'architectures': ['x86_64', 'arm64'], 'minimum_macos': '11.0',
         'build_macos': platform.mac_ver()[0], 'xcode': run('xcodebuild', '-version'),
         'signing': 'ad-hoc', 'notarized': False,

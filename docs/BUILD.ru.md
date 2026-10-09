@@ -6,11 +6,27 @@
 
 - Компилятор C++17 и CMake 3.22 или новее.
 - Исходники JUCE **7.0.12**. Полный релиз содержит `ThirdParty/JUCE-7.0.12.zip`; репозиторий ссылается на оригинальный выпуск библиотеки.
-- Windows x64 для готового VST3 и отдельного приложения. Проверка снимков интерфейса использует API Windows.
+- Инструменты Windows x64 для Windows-сборки либо Xcode и Ninja на macOS для Mac-сборки. Генератор снимков интерфейса использует API Windows.
 
-## Статус macOS
+## Универсальная сборка macOS
 
-Готовые архивы предназначены только для Windows. Исходники C++/JUCE можно использовать как основу отдельной macOS-сборки VST3/standalone с инструментами Mac и нужной архитектурой Intel/Apple Silicon. Mac-сборка, её подпись и проверки в DAW в этот релиз не входят. Не включайте `HOST_CHECK_SOURCE` на macOS: используемые здесь нативные проверки интерфейса/хоста зависят от API Windows. Команды ниже описывают сборку Windows и не являются проверенной инструкцией для Mac.
+Установите Xcode с инструментами командной строки, CMake 3.22+ и Ninja. Используйте оригинальные исходники JUCE 7.0.12. Из каталога исходников NoteShaper:
+
+```sh
+git clone --depth 1 --branch 7.0.12 https://github.com/juce-framework/JUCE.git ../JUCE-7.0.12
+python3 Build/patch_juce_macos.py ../JUCE-7.0.12
+cmake -S . -B build-macos -G Ninja -DCMAKE_BUILD_TYPE=Release -DJUCE_PATH="$PWD/../JUCE-7.0.12" '-DCMAKE_OSX_ARCHITECTURES=x86_64;arm64' -DCMAKE_OSX_DEPLOYMENT_TARGET=11.0 -DNOTESHAPER_BUILD_HOST_CHECK=ON
+cmake --build build-macos --target NoteShaper_VST3 NoteShaper_Standalone NoteShaperDSPTest NoteShaperHostCheck --parallel 3
+./build-macos/NoteShaperDSPTest
+./build-macos/NoteShaperHostCheck "$PWD/build-macos/NoteShaper_artefacts/Release/VST3/NoteShaper.vst3" unused
+python3 Build/package_macos.py --build-dir build-macos --juce-dir ../JUCE-7.0.12 --output-dir dist
+```
+
+VST3 и приложение появляются в `build-macos/NoteShaper_artefacts/Release`. Упаковщик проверяет обе архитектуры, ставит ad-hoc подпись, добавляет исходники/JUCE и создаёт ZIP с SHA-256. Сертификат Developer ID и нотарификация этим не обеспечиваются. Патч JUCE для портативной Windows-сборки на Mac не применяйте.
+
+Mac-патч JUCE отключает только неиспользуемую функцию захвата нативного окна при сборке с SDK macOS 15+, где Apple убрала старый API. NoteShaper её не вызывает; отрисовка компонентов и обработка звука не меняются. Оригинальные исходники JUCE и патч поставляются вместе.
+
+[Mac-сборка в GitHub](../.github/workflows/macos.yml) использует Xcode 16.4, нативно проверяет один упакованный универсальный VST3 на Intel и Apple Silicon и добавляет архив в существующий релиз версии только после обеих успешных проверок. Уже опубликованный Mac-архив сохраняется; для замены нужна новая версия проекта. `NOTESHAPER_BUILD_HOST_CHECK` включает переносимую проверку хоста. Генератор снимков `NoteShaperPreview` предназначен только для Windows.
 
 ## Visual Studio
 

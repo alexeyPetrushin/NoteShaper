@@ -10,6 +10,7 @@ on:
       - 'Tests/host_check.cpp'
       - 'Tests/dsp_test.cpp'
       - 'Build/package_macos.py'
+      - 'Build/patch_juce_macos.py'
   workflow_dispatch:
 
 permissions:
@@ -32,6 +33,8 @@ jobs:
         run: |
           git clone --depth 1 --branch 7.0.12 https://github.com/juce-framework/JUCE.git "$RUNNER_TEMP/JUCE"
           test "$(git -C "$RUNNER_TEMP/JUCE" rev-parse HEAD)" = 4f43011b96eb0636104cb3e433894cda98243626
+      - name: Apply JUCE 7 compatibility for current macOS SDK
+        run: python3 Build/patch_juce_macos.py "$RUNNER_TEMP/JUCE"
       - name: Configure universal build
         run: |
           cmake -S . -B build-macos -G Ninja \
