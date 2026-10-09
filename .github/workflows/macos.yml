@@ -86,8 +86,8 @@ jobs:
           shasum -a 256 -c *SHA256.txt
           ditto -x -k NoteShaper-*-macos-universal.zip extracted
           tar -xzf validation-tools.tar.gz
-          lipo -verify_arch x86_64 arm64 extracted/NoteShaper-*-macos/VST3/NoteShaper.vst3/Contents/MacOS/NoteShaper
-          lipo -verify_arch x86_64 arm64 extracted/NoteShaper-*-macos/Standalone/NoteShaper.app/Contents/MacOS/NoteShaper
+          lipo extracted/NoteShaper-*-macos/VST3/NoteShaper.vst3/Contents/MacOS/NoteShaper -verify_arch x86_64 arm64
+          lipo extracted/NoteShaper-*-macos/Standalone/NoteShaper.app/Contents/MacOS/NoteShaper -verify_arch x86_64 arm64
           codesign --verify --deep --strict extracted/NoteShaper-*-macos/VST3/NoteShaper.vst3
           codesign --verify --deep --strict extracted/NoteShaper-*-macos/Standalone/NoteShaper.app
       - name: Run DSP and native VST3 checks

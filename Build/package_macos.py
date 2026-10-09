@@ -36,7 +36,7 @@ def main():
         destination.parent.mkdir(parents=True, exist_ok=True)
         subprocess.check_call(['ditto', str(original), str(destination)])
         executable = destination / 'Contents/MacOS/NoteShaper'
-        subprocess.check_call(['lipo', '-verify_arch', 'x86_64', 'arm64', str(executable)])
+        subprocess.check_call(['lipo', str(executable), '-verify_arch', 'x86_64', 'arm64'])
         subprocess.check_call(['codesign', '--force', '--sign', '-', str(destination)])
         subprocess.check_call(['codesign', '--verify', '--deep', '--strict', str(destination)])
 
