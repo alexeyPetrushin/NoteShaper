@@ -4,22 +4,24 @@
 
 ## Compatibility
 
-NoteShaper 0.5.2 release archives contain a **Windows x64 VST3** plug-in and, in the full package, a Windows standalone application. Use a 64-bit DAW that supports VST3.
+NoteShaper 0.5.2 has separate **Windows x64** and **macOS universal (Intel/Apple Silicon, macOS 11+)** VST3 archives. Choose the archive for your operating system and use a 64-bit VST3 DAW.
 
 | Platform and host | Status |
 |---|---|
 | Windows x64, Ableton Live with VST3 | Compatible format. Validation used a separate VST3 test host; Live itself has not been tested. |
 | Windows x64, FL Studio with VST3 | Expected to work as a mixer effect. FL Studio supports VST3; NoteShaper has not yet been tested in FL Studio itself. |
 | Windows x64, another VST3 DAW | Format compatibility is expected; the specific host still needs validation. |
-| macOS, including Intel and Apple Silicon | No ready-made build is available. The Windows plug-in in these archives does not run on macOS. |
+| macOS 11+, Intel and Apple Silicon, VST3 host | The same universal Mac bundle passed native JUCE-host checks on both architectures. Ableton Live and FL Studio on Mac were not tested individually. |
 
-macOS requires a separate build of the C++/JUCE source for Intel/Apple Silicon and validation in the intended host. VST3 support in FL Studio or Ableton on Mac does not make the Windows binary compatible. See the [build guide](BUILD.en.md) and [Image-Line's explanation of separate Windows/macOS plug-ins](https://www.image-line.com/fl-studio-learning/fl-studio-online-manual/html/basics_externalplugins.htm).
+The Mac and Windows binaries are different; their VST3 format does not make them interchangeable. The Mac build uses an ad-hoc signature without Developer ID/notarization. See [Mac installation and security](MACOS.en.md) and [building from source](BUILD.en.md).
 
 ## Installation on Windows
 
-1. Download the VST3 or full archive from [Releases](https://github.com/alexeyPetrushin/NoteShaper/releases/latest) and extract it.
+**File for Windows x64:** [NoteShaper-0.5.2-win-vst3.zip](https://github.com/alexeyPetrushin/NoteShaper/releases/download/v0.5.2/NoteShaper-0.5.2-win-vst3.zip).
+
+1. Download that **win** archive and extract it.
 2. Close your DAW and other applications using the plug-in.
-3. Locate the **folder** `VST3/NoteShaper.vst3` in the extracted package. Copy that whole folder to one VST3 location scanned by your DAW. Keep `Contents`, `x86_64-win` and `Resources` intact; copying only the internal binary is not a complete installation.
+3. Locate the **folder** `NoteShaper.vst3` in the extracted package. Copy that whole folder to one VST3 location scanned by your DAW. Keep `Contents`, `x86_64-win` and `Resources` intact; copying only the internal binary is not a complete installation.
 4. Enable the corresponding VST3 source in your DAW and rescan plug-ins.
 5. Insert NoteShaper as an **audio effect** on an isolated dry vocal track or mixer channel, before reverb and delay.
 
@@ -33,7 +35,7 @@ The destination depends on Windows and the host configuration. `C:\Program Files
 | Current user only | `%LOCALAPPDATA%\Programs\Common\VST3`, if your host scans that user location. |
 | Custom folder | A dedicated VST3 folder explicitly selected in your DAW. Use this only when the host supports custom VST3 paths. |
 
-[Steinberg documents the standard locations](https://steinbergmedia.github.io/vst3_dev_portal/pages/Technical%2BDocumentation/Locations%2BFormat/Plugin%2BLocations.html); support for each location depends on the host. Install only the `NoteShaper.vst3` bundle in the scan folder. Keep source, documentation and the standalone app elsewhere.
+[Steinberg documents the standard locations](https://steinbergmedia.github.io/vst3_dev_portal/pages/Technical%2BDocumentation/Locations%2BFormat/Plugin%2BLocations.html); support for each location depends on the host. Install only the `NoteShaper.vst3` bundle in the scan folder. Keep the bundle intact and install a single copy.
 
 ### Ableton Live on Windows
 
@@ -54,6 +56,17 @@ Close your DAW, back up the old bundle outside all scan locations, replace the c
 ### If the plug-in is missing
 
 Check Windows x64/VST3 compatibility, bundle contents, the selected location and the host's scan report. If the host marked an earlier copy as failed, re-verify it using its plug-in manager. When requesting help, include Windows, DAW and NoteShaper versions, the install path and the scanner's message.
+
+## Installation on macOS
+
+**File for Mac, Intel and Apple Silicon, macOS 11+:** [NoteShaper-0.5.2-mac-vst3.zip](https://github.com/alexeyPetrushin/NoteShaper/releases/download/v0.5.2/NoteShaper-0.5.2-mac-vst3.zip).
+
+1. Download the **mac** archive, extract it and close your DAW.
+2. In Finder choose **Go → Go to Folder** and enter **`~/Library/Audio/Plug-Ins/VST3`** for your user, or **`/Library/Audio/Plug-Ins/VST3`** for all users. Create the folder if needed.
+3. Copy the whole **`NoteShaper.vst3` bundle** from the extracted archive into that folder.
+4. Enable VST3 scanning in your DAW, rescan and add NoteShaper as a vocal audio effect.
+
+The [Mac guide](MACOS.en.md) covers host settings and Gatekeeper. This universal build serves both Mac architectures; choose the **mac** download for macOS.
 
 ## Interface labels
 
@@ -126,5 +139,3 @@ Compare processed and original vocals, listening to consonants, note endings and
 One voice, approximately 65–1000 Hz. Accompaniment, noise, rough/breathy vocals and large jumps can cause incorrect targets and artifacts. There is no automatic song-key detection.
 
 The fixed 64 ms delay is reported to the DAW for playback compensation, but remains noticeable in live monitoring. This version has no formant/transpose controls, harmonization or graphical per-note editor.
-
-In the full package, `Standalone/NoteShaper.exe` opens the interface without a DAW. It does not install the VST3 automatically.

@@ -4,24 +4,37 @@
 
 [Support the author](https://www.donationalerts.com/r/lesha_diabet_)
 
-An open-source monophonic vocal pitch-correction effect for **Windows x64 / VST3**, with a standalone application. Choose a note, chord, scale or custom set, then dial in hard tuning or gentle correction with three always-visible rotary controls.
+An open-source monophonic vocal pitch-correction effect for **Windows x64 and macOS / VST3**. Choose a note, chord, scale or custom set, then dial in hard tuning or gentle correction with three always-visible rotary controls.
 
 ![NoteShaper interface](assets/preview.png)
 
-## Download
+## Download and install
 
-Get the Windows build from [Releases](https://github.com/alexeyPetrushin/NoteShaper/releases/latest).
+### Windows
 
-- **NoteShaper-0.5.2-vst3.zip**: ready-to-use VST3 bundle and guides.
-- **NoteShaper-0.5.2-full.zip**: VST3, standalone application, source, tests and the JUCE source archive.
+**File for Windows x64:** [NoteShaper-0.5.2-win-vst3.zip](https://github.com/alexeyPetrushin/NoteShaper/releases/download/v0.5.2/NoteShaper-0.5.2-win-vst3.zip).
 
-Extract the archive and close your DAW. Copy the entire `VST3/NoteShaper.vst3` folder to a VST3 location supported by your host, then rescan. The shared Windows location is `%CommonProgramFiles%\VST3`; the drive and custom-folder support depend on your setup and DAW. The [installation guide](docs/USER_GUIDE.en.md#installation-on-windows) covers system/user/custom paths, Ableton Live, FL Studio and updates.
+1. Download the **win** archive and extract it. It contains the `NoteShaper.vst3` folder.
+2. Close your DAW and copy that **whole folder** to a VST3 location scanned by your host. The shared Windows location is **`%CommonProgramFiles%\VST3`**; paste it into File Explorer's address bar. The drive and custom-folder support depend on your system and DAW.
+3. Rescan plug-ins and insert NoteShaper as an audio effect on your vocal track.
+
+The [Windows guide](docs/USER_GUIDE.en.md#installation-on-windows) covers other locations, Ableton Live, FL Studio and updates.
+
+### macOS
+
+**File for Mac, Intel and Apple Silicon, macOS 11+:** [NoteShaper-0.5.2-mac-vst3.zip](https://github.com/alexeyPetrushin/NoteShaper/releases/download/v0.5.2/NoteShaper-0.5.2-mac-vst3.zip).
+
+1. Download the **mac** archive, extract it and close your DAW.
+2. In Finder choose **Go → Go to Folder**, enter **`~/Library/Audio/Plug-Ins/VST3`**, and create the folder if needed. Copy the entire **`NoteShaper.vst3` bundle** there. For all users, use **`/Library/Audio/Plug-Ins/VST3`**.
+3. Rescan plug-ins and insert NoteShaper on your vocal track. See the [Mac guide](docs/MACOS.en.md) if macOS blocks loading.
+
+Both downloads contain only the VST3 bundle. Source and developer instructions are in this repository.
 
 ## Compatibility
 
-Ready-made downloads are **Windows x64**. Ableton Live, FL Studio and other 64-bit VST3 hosts are expected to load this format; NoteShaper has been checked in a JUCE VST3 host, not in those DAWs individually. [FL Studio supports VST3](https://www.image-line.com/fl-studio-learning/fl-studio-online-manual/html/basics_externalplugins.htm).
+Ready-made downloads include **Windows x64** and **macOS universal (Intel/Apple Silicon, macOS 11+)**. Ableton Live, FL Studio and other 64-bit VST3 hosts are expected to load this format; NoteShaper has been checked in a JUCE VST3 host, not in those DAWs individually. [FL Studio supports VST3](https://www.image-line.com/fl-studio-learning/fl-studio-online-manual/html/basics_externalplugins.htm).
 
-**macOS: no release build yet.** The Windows VST3/EXE files cannot run on a Mac. A separate Mac build and host validation are required; see the [build guide](docs/BUILD.en.md). Source availability is not a claim of tested Mac support.
+**macOS:** the same universal archive passed native DSP and JUCE VST3 host checks on both Intel and Apple Silicon. It is ad-hoc signed, without Developer ID or Apple notarization; see [Mac installation](docs/MACOS.en.md) for possible Gatekeeper blocking. Ableton Live and FL Studio have not been tested individually. [Build from source](docs/BUILD.en.md).
 
 ## Features
 
@@ -55,4 +68,4 @@ The implementation uses C++17 and JUCE 7.0.12. The original NoteFollow VST3 iden
 
 ## License
 
-This distribution is licensed under [GPL-3.0](LICENSE.txt). JUCE has its own GPL/commercial licensing terms; upstream license notices are retained in the JUCE source archive included with the full release. See [third-party notes](ThirdParty/README.md).
+This distribution is licensed under [GPL-3.0](LICENSE.txt). JUCE has its own GPL/commercial licensing terms; JUCE source and upstream license notices are available from its pinned upstream release. See [third-party notes](ThirdParty/README.md).

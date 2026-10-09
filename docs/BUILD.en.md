@@ -5,7 +5,7 @@
 ## Dependencies
 
 - C++17 compiler and CMake 3.22 or newer.
-- JUCE **7.0.12** source. The full release includes `ThirdParty/JUCE-7.0.12.zip`; the GitHub source repository links to upstream instead of storing the archive.
+- JUCE **7.0.12** source. Clone the pinned upstream tag `7.0.12` (commit `4f43011b96eb0636104cb3e433894cda98243626`) or download its source from JUCE.
 - A Windows x64 toolchain for Windows builds, or Xcode and Ninja on macOS for Mac builds. The screenshot helper uses Windows APIs.
 
 ## macOS universal build
@@ -16,15 +16,15 @@ Install Xcode with command-line tools, CMake 3.22+ and Ninja. Obtain the unchang
 git clone --depth 1 --branch 7.0.12 https://github.com/juce-framework/JUCE.git ../JUCE-7.0.12
 python3 Build/patch_juce_macos.py ../JUCE-7.0.12
 cmake -S . -B build-macos -G Ninja -DCMAKE_BUILD_TYPE=Release -DJUCE_PATH="$PWD/../JUCE-7.0.12" '-DCMAKE_OSX_ARCHITECTURES=x86_64;arm64' -DCMAKE_OSX_DEPLOYMENT_TARGET=11.0 -DNOTESHAPER_BUILD_HOST_CHECK=ON
-cmake --build build-macos --target NoteShaper_VST3 NoteShaper_Standalone NoteShaperDSPTest NoteShaperHostCheck --parallel 3
+cmake --build build-macos --target NoteShaper_VST3 NoteShaperDSPTest NoteShaperHostCheck --parallel 3
 ./build-macos/NoteShaperDSPTest
 ./build-macos/NoteShaperHostCheck "$PWD/build-macos/NoteShaper_artefacts/Release/VST3/NoteShaper.vst3" unused
 python3 Build/package_macos.py --build-dir build-macos --juce-dir ../JUCE-7.0.12 --output-dir dist
 ```
 
-VST3 and the standalone app are under `build-macos/NoteShaper_artefacts/Release`. The packager verifies both architectures, applies an ad-hoc signature, includes corresponding sources/JUCE, and writes the ZIP plus SHA-256. This does not provide Developer ID signing or notarization. Do not apply the portable Windows JUCE patch for this Mac build.
+The VST3 is under `build-macos/NoteShaper_artefacts/Release/VST3`. The packager verifies both architectures, applies an ad-hoc signature, embeds licensing/source links, and writes `NoteShaper-0.5.2-mac-vst3.zip` plus a SHA-256 file. The public ZIP contains only the VST3 bundle. A standalone developer app can be built separately with target `NoteShaper_Standalone`. This does not provide Developer ID signing or notarization. Do not apply the portable Windows JUCE patch for this Mac build.
 
-The Mac JUCE patch disables only the unused native-window capture function when building with a macOS 15+ SDK, where Apple removed its old API. NoteShaper does not call it; component painting and audio processing are unaffected. Original JUCE source and the patch are included together.
+The Mac JUCE patch disables only the unused native-window capture function when building with a macOS 15+ SDK, where Apple removed its old API. NoteShaper does not call it; component painting and audio processing are unaffected. The patch is in this repository; original JUCE source is available at the pinned upstream commit.
 
 The [macOS workflow](../.github/workflows/macos.yml) builds on Xcode 16.4, tests the same packaged universal plug-in natively on Intel and Apple Silicon, and adds the Mac download to the existing version's release only after both checks pass. It preserves an already-published Mac archive; use a new project version for a replacement. `NOTESHAPER_BUILD_HOST_CHECK` enables the portable host checker. The screenshot helper `NoteShaperPreview` is Windows-only.
 

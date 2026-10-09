@@ -4,24 +4,37 @@
 
 [Поддержать автора](https://www.donationalerts.com/r/lesha_diabet_)
 
-Открытый плагин коррекции высоты одного голоса для **Windows x64 / VST3**. Выберите ноту, аккорд, гамму или свой набор и настройте жёсткий эффект либо аккуратную подтяжку. Три крутилки постоянно доступны на одном экране.
+Открытый плагин коррекции высоты одного голоса для **Windows x64 и macOS / VST3**. Выберите ноту, аккорд, гамму или свой набор и настройте жёсткий эффект либо аккуратную подтяжку. Три крутилки постоянно доступны на одном экране.
 
 ![Интерфейс NoteShaper](assets/preview.png)
 
 ## Скачать и установить
 
-Готовая версия находится в [Releases](https://github.com/alexeyPetrushin/NoteShaper/releases/latest).
+### Windows
 
-- **NoteShaper-0.5.2-vst3.zip** — плагин VST3 и инструкции.
-- **NoteShaper-0.5.2-full.zip** — VST3, отдельное приложение, исходники, проверки и архив исходников JUCE.
+**Файл для Windows x64:** [NoteShaper-0.5.2-win-vst3.zip](https://github.com/alexeyPetrushin/NoteShaper/releases/download/v0.5.2/NoteShaper-0.5.2-win-vst3.zip).
 
-Распакуйте архив и закройте DAW. Скопируйте **всю папку** `VST3/NoteShaper.vst3` в поддерживаемый хостом каталог VST3 и пересканируйте плагины. Общая папка Windows — `%CommonProgramFiles%\VST3`; буква диска и поддержка своей папки зависят от системы и DAW. [Инструкция](docs/USER_GUIDE.ru.md#установка-на-windows) объясняет системную, пользовательскую и свою папки, установку в Ableton Live и FL Studio, а также обновление.
+1. Скачайте архив с **win** в имени и распакуйте его. Внутри находится папка `NoteShaper.vst3`.
+2. Закройте DAW и скопируйте эту **папку целиком** в сканируемый каталог VST3. Общий каталог Windows — **`%CommonProgramFiles%\VST3`**: вставьте путь в адресную строку Проводника. Буква диска и поддержка своей папки зависят от системы и DAW.
+3. Пересканируйте плагины и добавьте NoteShaper как аудиоэффект на дорожку вокала.
+
+[Windows-гайд](docs/USER_GUIDE.ru.md#установка-на-windows) описывает другие каталоги, Ableton Live, FL Studio и обновление.
+
+### macOS
+
+**Файл для Mac, Intel и Apple Silicon, macOS 11+:** [NoteShaper-0.5.2-mac-vst3.zip](https://github.com/alexeyPetrushin/NoteShaper/releases/download/v0.5.2/NoteShaper-0.5.2-mac-vst3.zip).
+
+1. Скачайте архив с **mac** в имени, распакуйте его и закройте DAW.
+2. В Finder выберите **Переход → Перейти к папке**, введите **`~/Library/Audio/Plug-Ins/VST3`** и создайте каталог, если его нет. Скопируйте туда **пакет `NoteShaper.vst3` целиком**. Для всех пользователей можно использовать **`/Library/Audio/Plug-Ins/VST3`**.
+3. Пересканируйте плагины и добавьте NoteShaper на дорожку вокала. Если macOS блокирует загрузку, откройте [Mac-гайд](docs/MACOS.ru.md).
+
+В обоих архивах только пакет VST3. Исходники и инструкции для разработчиков находятся в этом репозитории.
 
 ## Совместимость
 
-Готовая сборка — **Windows x64**. В Ableton Live, FL Studio и других 64-битных хостах VST3 ожидается совместимость по формату; NoteShaper проверен в VST3-хосте JUCE, а не отдельно в каждой DAW. [FL Studio поддерживает VST3](https://www.image-line.com/fl-studio-learning/fl-studio-online-manual/html/basics_externalplugins.htm).
+Готовые сборки: **Windows x64** и **macOS universal (Intel/Apple Silicon, macOS 11+)**. В Ableton Live, FL Studio и других 64-битных хостах VST3 ожидается совместимость по формату; NoteShaper проверен в VST3-хосте JUCE, а не отдельно в каждой DAW. [FL Studio поддерживает VST3](https://www.image-line.com/fl-studio-learning/fl-studio-online-manual/html/basics_externalplugins.htm).
 
-**macOS: готовой версии пока нет.** Windows-плагин и EXE на Mac не запускаются. Нужны отдельная Mac-сборка и проверка в DAW; подробности — в [гайде по сборке](docs/BUILD.ru.md). Наличие исходников не означает проверенную поддержку Mac.
+**macOS:** один универсальный архив прошёл нативные проверки DSP и загрузки VST3 в хосте JUCE на Intel и Apple Silicon. Подпись ad-hoc, без Developer ID и нотарификации Apple; возможная блокировка Gatekeeper описана в [инструкции для Mac](docs/MACOS.ru.md). В Ableton Live и FL Studio отдельно не тестировался. [Сборка из исходников](docs/BUILD.ru.md).
 
 ## Возможности
 
@@ -46,4 +59,4 @@
 
 ## Лицензия
 
-[GPL-3.0](LICENSE.txt). Использована JUCE 7.0.12 с её GPL/коммерческими условиями. Архив исходников библиотеки и лицензионные уведомления включены в полный релиз; см. [сторонние зависимости](ThirdParty/README.md).
+[GPL-3.0](LICENSE.txt). Использована JUCE 7.0.12 с её GPL/коммерческими условиями. Исходники библиотеки и её лицензионные уведомления доступны в закреплённом выпуске JUCE; см. [сторонние зависимости](ThirdParty/README.md).

@@ -1,14 +1,23 @@
 # Changelog / Изменения
 
+## 0.5.2 — macOS distribution, 2026-10-09
+
+- Added one universal VST3 package for Intel and Apple Silicon, targeting macOS 11+.
+- Verified the same packaged plug-in and DSP natively on both architectures with GitHub macOS runners.
+- Platform-labelled VST3 downloads, separate Windows/macOS installation guides, linked source and SHA-256. Ad-hoc signed; no Developer ID/notarization or DAW-specific Mac validation.
+- Windows DSP, user interface and saved parameter identity are unchanged.
+
+Добавлена универсальная Mac-сборка для Intel и Apple Silicon, macOS 11+. Один архив проверен на обеих архитектурах; есть отдельные инструкции Windows/macOS, ссылки на исходники и SHA-256. Подпись ad-hoc, без нотарификации. Windows-обработка и сохранённые параметры не изменены.
+
 ## 0.5.2 — 2026-10-08
 
-- The mode dropdown replaces the Targets heading; the chord/scale type dropdown is aligned on the right.
+- The mode dropdown is above the note keys, with the chord/scale type aligned on the right.
 - Twelve note keys stay visible in every mode. Chord keys transpose the complete chord in one click while retaining its type.
 - Note selects one target, Scale changes the tonic, Custom toggles notes, and MIDI shows incoming notes read-only.
 - Root and allowed chord/scale notes have distinct indicators. Removed the separate root dropdown.
 - Retained the three direct presets, three knobs, quiet language button and saved parameter identity.
 
-Вместо надписи Targets — выбор режима. Справа — тип аккорда или гаммы, ниже — постоянные клавиши C, C#, D и далее. В Chord нажатие переносит весь аккорд с сохранением типа. Основная нота выделена тёмным, другие допустимые ноты отмечены тонкой чертой. MIDI показывает поступающие ноты без ручного изменения.
+Выбор режима находится над клавишами. Справа — тип аккорда или гаммы, ниже — постоянные клавиши C, C#, D и далее. В Chord нажатие переносит весь аккорд с сохранением типа. Основная нота выделена тёмным, другие допустимые ноты отмечены тонкой чертой. MIDI показывает поступающие ноты без ручного изменения.
 
 ## 0.5.1 — 2026-10-08
 
