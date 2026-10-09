@@ -17,6 +17,8 @@ juce_add_plugin(NoteShaper
   NEEDS_MIDI_INPUT TRUE
   NEEDS_MIDI_OUTPUT FALSE
   IS_MIDI_EFFECT FALSE
+  MICROPHONE_PERMISSION_ENABLED TRUE
+  MICROPHONE_PERMISSION_TEXT "NoteShaper uses audio input to process your voice."
   VST3_CATEGORIES Fx PitchShift
   COPY_PLUGIN_AFTER_BUILD FALSE)
 target_sources(NoteShaper PRIVATE Source/PluginProcessor.cpp Source/PluginEditor.cpp)
@@ -34,7 +36,11 @@ target_include_directories(NoteShaperDSPTest PRIVATE Source)
 if(MINGW)
   target_link_options(NoteShaperDSPTest PRIVATE -static -static-libgcc -static-libstdc++)
 endif()
-if(DEFINED HOST_CHECK_SOURCE)
+option(NOTESHAPER_BUILD_HOST_CHECK "Build the native VST3 host smoke check" OFF)
+if(NOTESHAPER_BUILD_HOST_CHECK OR DEFINED HOST_CHECK_SOURCE)
+  if(NOT DEFINED HOST_CHECK_SOURCE)
+    set(HOST_CHECK_SOURCE "${CMAKE_CURRENT_SOURCE_DIR}/Tests/host_check.cpp")
+  endif()
   add_executable(NoteShaperHostCheck "${HOST_CHECK_SOURCE}")
   target_compile_definitions(NoteShaperHostCheck PRIVATE
     JUCE_WEB_BROWSER=0 JUCE_USE_CURL=0 JUCE_PLUGINHOST_VST3=1 JUCE_PLUGINHOST_VST=0
@@ -43,13 +49,15 @@ if(DEFINED HOST_CHECK_SOURCE)
   if(MINGW)
     target_link_options(NoteShaperHostCheck PRIVATE -static -static-libgcc -static-libstdc++)
   endif()
-  add_executable(NoteShaperPreview Tests/preview.cpp)
-  target_include_directories(NoteShaperPreview PRIVATE Source "${JUCE_PATH}/modules")
-  target_compile_definitions(NoteShaperPreview PRIVATE
-    JUCE_GLOBAL_MODULE_SETTINGS_INCLUDED=1 JUCE_WEB_BROWSER=0 JUCE_USE_CURL=0
-    JUCE_DISPLAY_SPLASH_SCREEN=0 JUCE_REPORT_APP_USAGE=0)
-  target_link_libraries(NoteShaperPreview PRIVATE NoteShaper)
-  if(MINGW)
-    target_link_options(NoteShaperPreview PRIVATE -static -static-libgcc -static-libstdc++)
+  if(WIN32)
+    add_executable(NoteShaperPreview Tests/preview.cpp)
+    target_include_directories(NoteShaperPreview PRIVATE Source "${JUCE_PATH}/modules")
+    target_compile_definitions(NoteShaperPreview PRIVATE
+      JUCE_GLOBAL_MODULE_SETTINGS_INCLUDED=1 JUCE_WEB_BROWSER=0 JUCE_USE_CURL=0
+      JUCE_DISPLAY_SPLASH_SCREEN=0 JUCE_REPORT_APP_USAGE=0)
+    target_link_libraries(NoteShaperPreview PRIVATE NoteShaper)
+    if(MINGW)
+      target_link_options(NoteShaperPreview PRIVATE -static -static-libgcc -static-libstdc++)
+    endif()
   endif()
 endif()

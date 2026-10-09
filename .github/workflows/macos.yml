@@ -1,0 +1,128 @@
+name: macOS universal build
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/macos.yml'
+      - 'CMakeLists.txt'
+      - 'Source/**'
+      - 'Tests/host_check.cpp'
+      - 'Tests/dsp_test.cpp'
+      - 'Build/package_macos.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: macos-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build universal VST3 and standalone
+    runs-on: macos-15-intel
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - name: Select Xcode
+        run: sudo xcode-select -s /Applications/Xcode_16.4.app
+      - name: Fetch pinned JUCE 7.0.12
+        run: |
+          git clone --depth 1 --branch 7.0.12 https://github.com/juce-framework/JUCE.git "$RUNNER_TEMP/JUCE"
+          test "$(git -C "$RUNNER_TEMP/JUCE" rev-parse HEAD)" = 4f43011b96eb0636104cb3e433894cda98243626
+      - name: Configure universal build
+        run: |
+          cmake -S . -B build-macos -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DJUCE_PATH="$RUNNER_TEMP/JUCE" \
+            '-DCMAKE_OSX_ARCHITECTURES=x86_64;arm64' \
+            -DCMAKE_OSX_DEPLOYMENT_TARGET=11.0 \
+            -DNOTESHAPER_BUILD_HOST_CHECK=ON
+      - name: Build
+        run: cmake --build build-macos --target NoteShaper_VST3 NoteShaper_Standalone NoteShaperHostCheck NoteShaperDSPTest --parallel 3
+      - name: Package and check bundle architectures/signatures
+        run: python3 Build/package_macos.py --build-dir build-macos --juce-dir "$RUNNER_TEMP/JUCE" --output-dir dist
+      - name: Preserve executable permissions for runtime checks
+        run: |
+          codesign --force --sign - build-macos/NoteShaperHostCheck
+          codesign --force --sign - build-macos/NoteShaperDSPTest
+          tar -czf dist/validation-tools.tar.gz -C build-macos NoteShaperHostCheck NoteShaperDSPTest
+      - uses: actions/upload-artifact@v4
+        with:
+          name: macos-universal-candidate
+          path: |
+            dist/*.zip
+            dist/*SHA256.txt
+            dist/validation-tools.tar.gz
+          if-no-files-found: error
+          retention-days: 14
+
+  test:
+    name: Native runtime check (${{ matrix.arch }})
+    needs: build
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: macos-15-intel
+            arch: x86_64
+          - runner: macos-15
+            arch: arm64
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 10
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: macos-universal-candidate
+          path: candidate
+      - name: Extract and verify downloaded archive
+        run: |
+          cd candidate
+          shasum -a 256 -c *SHA256.txt
+          ditto -x -k NoteShaper-*-macos-universal.zip extracted
+          tar -xzf validation-tools.tar.gz
+          lipo -verify_arch x86_64 arm64 extracted/NoteShaper-*-macos/VST3/NoteShaper.vst3/Contents/MacOS/NoteShaper
+          lipo -verify_arch x86_64 arm64 extracted/NoteShaper-*-macos/Standalone/NoteShaper.app/Contents/MacOS/NoteShaper
+          codesign --verify --deep --strict extracted/NoteShaper-*-macos/VST3/NoteShaper.vst3
+          codesign --verify --deep --strict extracted/NoteShaper-*-macos/Standalone/NoteShaper.app
+      - name: Run DSP and native VST3 checks
+        run: |
+          test "$(uname -m)" = '${{ matrix.arch }}'
+          arch -${{ matrix.arch }} candidate/NoteShaperDSPTest
+          plugin="$(find "$PWD/candidate/extracted" -name NoteShaper.vst3 -type d)"
+          arch -${{ matrix.arch }} candidate/NoteShaperHostCheck "$plugin" unused
+
+  publish:
+    name: Add Mac download to the version's release
+    needs: [build, test]
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: macos-universal-candidate
+          path: dist
+      - name: Publish once after both native checks pass
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          archive="$(find dist -maxdepth 1 -name 'NoteShaper-*-macos-universal.zip')"
+          filename="$(basename "$archive")"
+          version="${filename#NoteShaper-}"
+          version="${version%-macos-universal.zip}"
+          tag="v$version"
+          gh release view "$tag" --json assets --jq '.assets[].name' > "$RUNNER_TEMP/release-assets.txt"
+          if grep -Fxq "$filename" "$RUNNER_TEMP/release-assets.txt"; then
+            echo "Mac release already exists; preserving the published archive. Bump the project version for a new release."
+            exit 0
+          fi
+          gh release upload "$tag" "$archive" dist/*SHA256.txt
+          gh release view "$tag" --json body --jq .body > "$RUNNER_TEMP/release-notes.md"
+          cat Build/MAC_RELEASE_NOTES.md >> "$RUNNER_TEMP/release-notes.md"
+          gh release edit "$tag" --notes-file "$RUNNER_TEMP/release-notes.md"
